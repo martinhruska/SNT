@@ -1,4 +1,4 @@
 SNT
 ===
 
-Project fot SNT lecture @ FIT BUT
+Project for SNT lecture @ FIT BUT
