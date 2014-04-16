@@ -6,6 +6,7 @@
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{tikz}
 \usepackage{url}
 \usepackage{comment}
@@ -22,22 +23,66 @@
 
 \section{Úvod}
 \label{sec:intro}
+% speek about np hardness of problem
 
-\section{Analýza \rcps}
-\subsection{Definice \rcps}
+\section{Definice a analýza \rcps}
+Napřed formálně definujme \rcps. Ten lze formálně definovat šesticí $(V, p, E, R, B, b)$ \cite{artigues:2007}, kde
+\begin{enumerate}
+    \item $V=\{A_0, \ldots, A_{n+1}\}$ je množina aktivit, které mají být vykonány.
+    Dle konvence je $A_0$ aktivita reprezentující začátek rozvrhu a $A_{n+1}$ aktivita reprezentující konec rozvrhu.
+    \item $p: V~\leftarrow \mathbb{N}$ je funkce udávající dobu trvání aktivit.
+    \item $E \subseteq V\times V$ je precedenční relace.
+    Pokud $(A_i, A_j) \in E$, tak aktivita $A_i$ musí být provedena před aktivitou $A_j$.
+    \item $R=\{R_1,\ldots,R_q\}$ je množina zdrojů.
+    \item $B: R \leftarrow \mathbb{N}$ je funkce udávající kapacitu zdrojů.
+    \item $b: V~\times R \leftarrow \mathbb{N}$ je funkce udavájící množství určitého zdroje, které vyžaduje daná aktivita pro
+    svoje provádění.
+\end{enumerate}
+
+Řešením tohoto problému je vektor $<S_0,\ldots,S_{n+1}>$, kde $S_i$ je doba začátku aktivity $A_i$.
+Toto řešení můžeme nazývat rozvrhem.
+Řešení musí splňovat omezení daná precedenční relací a dostupností zdrojů, což lze formálně zapsat následovně:
+\begin{equation}
+ \forall (A_i,A_j) \in E: S_j - S_i \geq p(A_i)
+\end{equation}
+\begin{equation}
+ \forall R_k \in R \forall t \geq 0: \sum_{A_i \in A_t} b(A_i, R_k) \leq B(k)
+\end{equation}
+kde $A_t=\{A_i \in A\,|\, S_i \leq t \leq S_i+p(A_i)\}$.
+
+Kritériem optimálnosti u~\rcps je tzv. \emph{makespan}, což je doba začátku provádění aktivity $A_{n+1}$.
+Optimalizačním problémem tedy je nalézení řešení \rcps\ úlohy s~minimální makespan.
+
+V~dalším textu jsou uvažovány \emph{single-mode} \rcps\ úlohy.
+Single-mode znamená, že aktivity dané úlohy mají pouze jeden mód činnosti,
+narozdíl od tzv. \emph{multi-mode} úloh jejichž aktivity mají více módu činnosti
+a každý mód má odlišné požadavky na spotřebu zdrojů.
+
+%define goal
+% solving methods of rcps
 \subsection{PSPLib}
-\subsection{SAT Solving}
+% what is it and how should I use it
 \subsection{SAT Solving v~RCPS}
+% define sat problem
+% what is sat solving
+% how is it used in my model
+% used sat solvers
 
 \section{Konceptuální model}
+% picture with desing -- conceptual way
+% formalizovat prevod zadani rcps modelu na sat formuli
+
 
 \section{Architektura}
+% describe classes, data structures
+% what is sat solver, translater, parser
 
 \section{Experimenty}
+% this is clear
 
 \section{Závěr}
+% make this beatiful!
 
-\cite{Peringer:IMS} % todo remove this citation
 \newpage
 \bibliography{literatura}
 \bibliographystyle{czechiso}
