@@ -25,8 +25,13 @@
 \label{sec:intro}
 % speek about np hardness of problem
 
-\section{Definice a analýza \rcps}
-Napřed formálně definujme \rcps. Ten lze formálně definovat šesticí $(V, p, E, R, B, b)$ \cite{artigues:2007}, kde
+\section{Analýza \rcps}
+V~této sekci bude napřed formálně definován \rcps\ problém a optimalizační problém související s~jeho řešení.
+Dále bude popsána knihovna PSPLIB a její formát popisu instancí RCPS problému.
+Následně budou zkoumány možnosti a způsoby využití SAT solving při řešení RCPS problému.
+
+\subsection{Formální definice RCPS}
+\rcps je definován šesticí $(V, p, E, R, B, b)$ \cite{artigues:2007}, kde
 \begin{enumerate}
     \item $V=\{A_0, \ldots, A_{n+1}\}$ je množina aktivit, které mají být vykonány.
     Dle konvence je $A_0$ aktivita reprezentující začátek rozvrhu a $A_{n+1}$ aktivita reprezentující konec rozvrhu.
@@ -58,10 +63,19 @@ Single-mode znamená, že aktivity dané úlohy mají pouze jeden mód činnosti
 narozdíl od tzv. \emph{multi-mode} úloh jejichž aktivity mají více módu činnosti
 a každý mód má odlišné požadavky na spotřebu zdrojů.
 
-%define goal
 % solving methods of rcps
-\subsection{PSPLib}
+\subsection{PSPLIB}
 % what is it and how should I use it
+%Dokumentovaný nástroj očekává jako vstup instanci RCSP problému zadanou ve formátu používaném knihovnou \emph{PSPLIB}, jež
+%ude v~této sekci stejně jako formát vstupu stručně popsána.
+PSPLIB je knihovna združíjící sady instancí \rcps\ problému v~jeho různých variantách a jejich optimální a heuristická řešení \cite{psplib}.
+Knihovna používá ke generování instancí problému vlastní nástroj \emph{ProGen}.
+Ve shodě se zadáním projektu byly použita data knihovny PSPLIB jako vstupy dokumentováného nástroje.
+Použití knihovny je vhodné také díky možnosti porovnávat výstupy vytvořeného programu s~optimálními řešeními, které
+knihovna pro mnoho instancí problému obsahuje.
+Příklad vstupních dat lze najít v~adresáří \emph{input}.
+TODO DECRIBE STRUCTURE OR DETELE THIS
+
 \subsection{SAT Solving v~RCPS}
 % define sat problem
 % what is sat solving
