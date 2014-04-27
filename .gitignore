@@ -11,3 +11,14 @@
 *.lai
 *.la
 *.a
+
+*.aux
+*.bbl
+*.blg
+*.bst
+*.log
+*.pdf
+*.te~
+*.swp
+input/*
+bin/*
