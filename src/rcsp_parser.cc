@@ -60,6 +60,7 @@ int Parser::parse(RCSPInstance& instance, const char* source)
                         instance.jobs_, instance.jobs_);
                 instance.initializeVector(instance.durations_,
                         instance.jobs_);
+                instance.initializeTimeWindows(instance.jobs_);
                 state = 4;
                 break;
             }
@@ -428,8 +429,23 @@ void Parser::toString(RCSPInstance& instance)
         std::cout << '\n';
     }
 
+    std::cout << "Earliest starts ";
+    for(int i : instance.eStarts_)
+    {
+        std::cout << i << " ";
+    }
+    std::cout << '\n';
+
+    std::cout << "Latest starts ";
+    for(int i : instance.lStarts_)
+    {
+        std::cout << i << " ";
+    }
+    std::cout << '\n';
+
     std::cout << "Additional information \n";
     std::cout << "Upper boud " << instance.upperBound_ << '\n';
+    std::cout << "Lower boud " << instance.upperBound_ << '\n';
     std::cout << "Project number " << instance.projNum_ << '\n';
     std::cout << "Real jobs " << instance.realJobs_ << '\n';
     std::cout << "Rel date " << instance.relDate_ << '\n';

@@ -2,16 +2,22 @@ CC=g++
 CFLAGS=-Wall -Wextra -std=c++11
 MAIN=rcsp_solver
 PARSER=rcsp_parser
+GRAPH=rcsp_graph
+FWALG=rcsp_floyd_warshall
 
-FILES=$(MAIN).cc $(PARSER).o
+GRAPH_COMP=$(FWALG).cc
+FILES=$(MAIN).cc $(PARSER).o $(GRAPH).o $(GRAPH_COMP)
 
 all: $(MAIN)
 
-$(MAIN): $(FILES)
+$(MAIN): $(FILES) $(GRAPH_COMP)
 	$(CC) $(CFLAGS) $(FILES) -o $@
 
 $(PARSER).o: $(PARSER).cc
 	$(CC) $(CFLAGS) $(PARSER).cc -c
+
+$(GRAPH).o: $(GRAPH).cc $(GRAPH_COMP)
+	$(CC) $(CFLAGS) $(GRAPH).cc $(GRAPH_COMP) -c
 
 clean:
 	rm *.o $(MAIN)

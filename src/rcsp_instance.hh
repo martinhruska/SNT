@@ -18,14 +18,15 @@ private: // private data members
     Vector durations_;
     Vector resourcesAval_;
     Vector eStarts_;
-    Vector eFinishs_;
+    Vector eFinishes_;
     Vector lStarts_;
-    Vector lFinishs_;
+    Vector lFinishes_;
 
     Matrix resourceDemands_;
     Matrix precedenceRel_;
 
     int upperBound_;
+    int lowerBound_;
 
     // additional psp lib info
     int projNum_;
@@ -41,7 +42,7 @@ public: // public member functions
     inline void setDemand(ActivityType act, ResourceType res, int val)
         {resourceDemands_[act][res] = val;}
 
-    inline int getPrecedence(ActivityType act1, ActivityType act2)
+    inline int getPrecedence(ActivityType act1, ActivityType act2) const
         {return precedenceRel_[act1][act2];}
     inline void setPrecedence(ActivityType act1, ActivityType act2, int val)
         {precedenceRel_[act1][act2] = val;}
@@ -53,28 +54,34 @@ public: // public member functions
         {
             matrix[i] = Vector(y);
         }
-        /*
-        for(int i = 0; i < x; ++i)
-        {
-            matrix.push_back(Vector());
-            for(int j = 0; j < y; ++j)
-            {
-                matrix[j].push_back(0);
-            }
-        }
-        */
     }
 
     void initializeVector(Vector& vec, const int x)
     {
         vec = Vector(x);
-        /*
-        for(int i = 0; i < x; ++i)
-        {
-            vec.push_back(0);
-        }
-        */
     }
+
+    void initializeTimeWindows(const int x)
+    {
+        initializeVector(eStarts_,x);
+        initializeVector(lStarts_,x);
+        initializeVector(eFinishes_,x);
+        initializeVector(lFinishes_,x);
+    }
+
+    void setLowerBound(int val) {lowerBound_ = val;}
+    void setEStart(int job, int val) {eStarts_[job] = val;}
+    void setEFinish(int job, int val) {eFinishes_[job] = val;}
+    void setLStart(int job, int val) {lStarts_[job] = val;}
+    void setLFinish(int job, int val) {lFinishes_[job] = val;}
+
+
+    int getUpperBound() {return upperBound_;}
+    int getDuration(int pos) const
+    {
+        return durations_[pos];
+    }
+    int getJobsNumber() const {return jobs_;}
 
 public: // friend functions
     //friend int parse(RCSPInstance& instance, const char* source);

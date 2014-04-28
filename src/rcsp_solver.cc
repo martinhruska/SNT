@@ -2,8 +2,11 @@
 #include <iostream>
 
 #include "rcsp_parser.hh"
+#include "rcsp_graph.hh"
 
 #define UNUSED(x) (void)(x)
+
+using namespace RCSPSolver;
 
 int main(int argc, char** argv)
 {
@@ -17,8 +20,8 @@ int main(int argc, char** argv)
 
     // parse input file
     const char *inputFile = argv[infilePos];
-    RCSPSolver::RCSPInstance instance;
-    int res = RCSPSolver::Parser::parse(instance, inputFile);
+    RCSPInstance instance;
+    int res = Parser::parse(instance, inputFile);
     if (res)
     {
         if (res == 2)
@@ -31,7 +34,14 @@ int main(int argc, char** argv)
         }
         return EXIT_FAILURE;
     }
-    RCSPSolver::Parser::toString(instance);
+    PrecedenceGraph precGraph(instance.getJobsNumber());
+    if (parseGraphFromRCSPInstance(precGraph, instance) != 0)
+    {
+        std::cerr << "Cannot parser to precedence graph\n";
+    }
+    rcspFloydWarshall(precGraph);
+    storeGraphValuesToInstance(precGraph,instance);
+    Parser::toString(instance);
 
     return EXIT_SUCCESS;
 }
