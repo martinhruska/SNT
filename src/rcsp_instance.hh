@@ -48,22 +48,32 @@ public: // public member functions
 
     void initializeMatrix(Matrix& matrix, const int x, const int y)
     {
+        matrix = std::vector<Vector>(x);
+        for(int i = 0; i < x; ++i)
+        {
+            matrix[i] = Vector(y);
+        }
+        /*
         for(int i = 0; i < x; ++i)
         {
             matrix.push_back(Vector());
             for(int j = 0; j < y; ++j)
             {
-                matrix[i].push_back(0);
+                matrix[j].push_back(0);
             }
         }
+        */
     }
 
     void initializeVector(Vector& vec, const int x)
     {
+        vec = Vector(x);
+        /*
         for(int i = 0; i < x; ++i)
         {
             vec.push_back(0);
         }
+        */
     }
 
 public: // friend functions
