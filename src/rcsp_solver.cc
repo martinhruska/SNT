@@ -1,12 +1,12 @@
 #include <stdlib.h>
 #include <iostream>
 
-#include "rcsp_parser.hh"
-#include "rcsp_graph.hh"
+#include "rcps_parser.hh"
+#include "rcps_graph.hh"
 
 #define UNUSED(x) (void)(x)
 
-using namespace RCSPSolver;
+using namespace RCPSSolver;
 
 int main(int argc, char** argv)
 {
@@ -20,7 +20,7 @@ int main(int argc, char** argv)
 
     // parse input file
     const char *inputFile = argv[infilePos];
-    RCSPInstance instance;
+    RCPSInstance instance;
     int res = Parser::parse(instance, inputFile);
     if (res)
     {
@@ -35,11 +35,11 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
     PrecedenceGraph precGraph(instance.getJobsNumber());
-    if (parseGraphFromRCSPInstance(precGraph, instance) != 0)
+    if (parseGraphFromRCPSInstance(precGraph, instance) != 0)
     {
         std::cerr << "Cannot parser to precedence graph\n";
     }
-    rcspFloydWarshall(precGraph);
+    rcpsFloydWarshall(precGraph);
     storeGraphValuesToInstance(precGraph,instance);
     Parser::toString(instance);
 

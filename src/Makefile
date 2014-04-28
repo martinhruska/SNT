@@ -1,9 +1,9 @@
 CC=g++
 CFLAGS=-Wall -Wextra -std=c++11
 MAIN=rcsp_solver
-PARSER=rcsp_parser
-GRAPH=rcsp_graph
-FWALG=rcsp_floyd_warshall
+PARSER=rcps_parser
+GRAPH=rcps_graph
+FWALG=rcps_floyd_warshall
 
 GRAPH_COMP=$(FWALG).cc
 FILES=$(MAIN).cc $(PARSER).o $(GRAPH).o $(GRAPH_COMP)
