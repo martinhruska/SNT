@@ -37,14 +37,14 @@ private: // private data members
     int mpmTime_;
 
 public: // public member functions
-    inline int getDemand(ActivityType act, ResourceType res)
+    inline int getDemand(JobType act, ResourceType res)
         {return resourceDemands_[act][res];}
-    inline void setDemand(ActivityType act, ResourceType res, int val)
+    inline void setDemand(JobType act, ResourceType res, int val)
         {resourceDemands_[act][res] = val;}
 
-    inline int getPrecedence(ActivityType act1, ActivityType act2) const
+    inline int getPrecedence(JobType act1, JobType act2) const
         {return precedenceRel_[act1][act2];}
-    inline void setPrecedence(ActivityType act1, ActivityType act2, int val)
+    inline void setPrecedence(JobType act1, JobType act2, int val)
         {precedenceRel_[act1][act2] = val;}
 
     void initializeMatrix(Matrix& matrix, const int x, const int y)
@@ -74,6 +74,11 @@ public: // public member functions
     void setEFinish(int job, int val) {eFinishes_[job] = val;}
     void setLStart(int job, int val) {lStarts_[job] = val;}
     void setLFinish(int job, int val) {lFinishes_[job] = val;}
+
+    int getEStart(int job) const {return eStarts_[job];}
+    int getLStart(int job) const {return lStarts_[job];}
+    int getEFinish(int job) const {return eFinishes_[job];}
+    int getLFinish(int job) const {return lFinishes_[job];}
 
 
     int getUpperBound() {return upperBound_;}

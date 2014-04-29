@@ -3,6 +3,7 @@
 
 #include "rcps_parser.hh"
 #include "rcps_graph.hh"
+#include "rcps_sat_model.hh"
 
 #define UNUSED(x) (void)(x)
 
@@ -41,7 +42,9 @@ int main(int argc, char** argv)
     }
     rcpsFloydWarshall(precGraph);
     storeGraphValuesToInstance(precGraph,instance);
-    Parser::toString(instance);
-
+    RCPSSATModel model;
+    createSATmodelFromRCPS(model, instance);
+    printModel(model);
+    //Parser::toString(instance);
     return EXIT_SUCCESS;
 }

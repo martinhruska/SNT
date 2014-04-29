@@ -4,40 +4,56 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 
 namespace RCPSSolver
 {
-    typedef int ActivityType;
+    typedef int JobType;
     typedef int ResourceType;
     typedef std::vector<int> Vector;
     typedef std::vector<Vector> Matrix;
     typedef std::unordered_map<std::string, int> Translator;
 
-    struct Literal
+    struct Variable
     {
+        int id;
+        JobType job;
         int time;
-        int activity;
-        int var;
-        bool sign;
 
-        friend Literal createLiteral(int time, int activity,
-                int var, bool sign=false);
+        friend Variable createVariable(int id, JobType job, int time);
     };
 
-    inline Literal createLiteral(int time, int activity, int var, bool sign)
+    inline Variable createVariable(int id, JobType job, int time)
+    {
+        Variable v;
+        v.id = id;
+        v.job = job;
+        v.time = time;
+
+        return v;
+    }
+
+    struct Literal
+    {
+        struct Variable* var;
+        bool sign;
+
+        friend Literal createLiteral(int var, bool sign=true);
+    };
+
+    inline Literal createLiteral(Variable* var, bool sign)
     {
         Literal l;
-        l.time = time;
-        l.activity = activity;
         l.var = var;
         l.sign = sign;
 
         return l;
     }
 
-    typedef std::unordered_map<int,Literal> LiteralDatabase;
-    typedef std::unordered_set<int> Clause;
+    typedef std::unordered_map<int,Variable> VariableDb;
+    typedef std::unordered_map<int,Variable*> TimeToVar;
+    typedef std::unordered_map<JobType,TimeToVar> JobTimeVarMap;
+    typedef std::vector<Literal> Clause;
+    typedef std::vector<Clause> ClauseDb;
 }
 
 #endif
