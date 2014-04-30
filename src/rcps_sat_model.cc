@@ -77,8 +77,41 @@ int RCPSSolver::createSATmodelFromRCPS(RCPSSATModel &model,
         }
     }
 
+    model.clausesTimeCons_ = ClauseDb();
+
     return 0;
 
+}
+
+/**
+ * Function limits maximal makespan to newMaxTime.
+ * @param newMaxTime new limit of maximal makespan
+ * @param lastMaxTime old limit of maximal makspan
+ * @param instance RCPS instance
+ * @param model SAT model where constrains are added
+ */
+int RCPSSolver::modelTimeConstraint(const int newMaxTime, const int lastMaxTime,
+        RCPSSATModel& model, const RCPSInstance& instance)
+{
+    if (newMaxTime < instance.getLowerBound())
+    {
+        return 1;
+    }
+    const int lastJob = instance.getJobsNumber()-1;
+    for (int time = newMaxTime; time < lastMaxTime; ++time)
+    {
+        if (!model.startVarMap_.count(lastJob) ||
+                !model.startVarMap_[lastJob].count(time))
+        {
+            return 2;
+        }
+        model.clausesTimeCons_.push_back(Clause());
+        Literal lit = createLiteral(
+            model.startVarMap_[lastJob][time], false);
+        model.clausesTimeCons_.back().push_back(lit);
+    }
+
+    return 0;
 }
 
 /**
@@ -116,7 +149,6 @@ int RCPSSolver::createVarDb(RCPSSATModel& model,
     }
     return 0;
 }
-
 
 void RCPSSolver::printModel(RCPSSATModel& model)
 {

@@ -4,6 +4,9 @@
 #include "rcps_parser.hh"
 #include "rcps_graph.hh"
 #include "rcps_sat_model.hh"
+#include "rcps_model_to_glucose.hh"
+#include "core/Solver.h"
+#include "rcps_optimizer.hh"
 
 #define UNUSED(x) (void)(x)
 
@@ -44,7 +47,43 @@ int main(int argc, char** argv)
     storeGraphValuesToInstance(precGraph,instance);
     RCPSSATModel model;
     createSATmodelFromRCPS(model, instance);
-    printModel(model);
+    if (modelTimeConstraint(instance.getLowerBound(),instance.getUpperBound(),
+            model, instance))
+    {
+        std::cerr << "It is not possible to solve problem under lower bound" << std::endl;
+        return EXIT_SUCCESS;
+    }
+
+   
+    RCPSOptimizer::optimize(model, instance);
+    //printModel(model);
     //Parser::toString(instance);
+    /*
+    Glucose::Solver solver;
+    RCPSModel2Glucose transformer;
+    transformer.transformModel2Solver(model, solver);
+    if (!solver.solve())
+    {
+        std::cerr << "Unable to solve the model\n";
+        return EXIT_SUCCESS;
+    }
+    auto revVar = transformer.getReverseVar();
+    auto dbs = model.getStartVars();
+    auto dbp = model.getProcessVars();
+    for (int i=0; i<solver.nVars(); ++i)
+    {
+        int v = revVar[i];
+        Variable vp;
+        if (dbs.count(v))
+        {
+            vp = dbs[v];
+            std::cout << "Activity " << vp.job << " Time " << vp.time << " is " << (solver.model[i] == l_True) << std::endl;
+        }
+        else if (dbp.count(v))
+        {
+            vp = dbp[v];
+        }
+    }
+    */
     return EXIT_SUCCESS;
 }

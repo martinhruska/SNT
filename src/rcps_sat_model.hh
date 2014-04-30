@@ -13,6 +13,8 @@ namespace RCPSSolver
             const RCPSInstance& instance);
     void printModel(RCPSSATModel& model);
     void printClauseDb(ClauseDb& clause);
+    int modelTimeConstraint(const int newMaxTime, const int lastMaxTime,
+            RCPSSATModel& model, const RCPSInstance& instance);
 }
 
 class RCPSSolver::RCPSSATModel
@@ -27,6 +29,7 @@ private: // private data members
     ClauseDb clausesPrecedence_;
     ClauseDb clausesStart_;
     ClauseDb clausesCover_;
+    ClauseDb clausesTimeCons_;
 
 public: // public constructor
     RCPSSATModel() : varCounter_(0)
@@ -38,15 +41,24 @@ private: // private functions
 public: // public functions
     int getVarCounter() {return varCounter_;}
     ClauseDb& getConsistency() {return clausesConsistency_;}
+    ClauseDb& getPrecedence() {return clausesPrecedence_;}
+    ClauseDb& getStart() {return clausesStart_;}
+    ClauseDb& getTimeCons() {return clausesTimeCons_;}
+
+    VariableDb& getStartVars() {return startVarDb_;}
+    VariableDb& getProcessVars() {return processVarDb_;}
+
 
 public: // public functions
     friend int createSATmodelFromRCPS(RCPSSATModel& model,
             const RCPSInstance& instance);
     friend void printModel(RCPSSATModel& model);
     friend void printClauseDb(ClauseDb& clause);
+    friend int modelTimeConstraint(const int newMaxTime, const int lastMaxTime,
+            RCPSSATModel& model, const RCPSInstance& instance);
 private:
     friend int createVarDb(RCPSSATModel& model,
-            const RCPSInstance& instance);
+             const RCPSInstance& instance);
 };
 
 #endif

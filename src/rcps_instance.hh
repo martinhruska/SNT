@@ -81,7 +81,8 @@ public: // public member functions
     int getLFinish(int job) const {return lFinishes_[job];}
 
 
-    int getUpperBound() {return upperBound_;}
+    int getUpperBound() const {return upperBound_;}
+    int getLowerBound() const {return lowerBound_;}
     int getDuration(int pos) const
     {
         return durations_[pos];
