@@ -2,7 +2,7 @@ PROJ=rcps_solver
 
 all:
 	cd src && make
-	mv src/$(PROJ) bin/
+	cp src/$(PROJ) bin/
 #cd src && rm *.o
 
 run:

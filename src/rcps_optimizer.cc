@@ -1,11 +1,14 @@
 #include "rcps_optimizer.hh"
 
+#include "rcps_model_to_minisat.hh"
+
 #include <iostream>
 
-#include "rcps_model_to_glucose.hh"
+//#include "rcps_model_to_glucose.hh"
 
 using namespace RCPSSolver;
-using namespace Glucose;
+//using namespace Glucose;
+using namespace Minisat;
 
 int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance)
 {
@@ -16,7 +19,8 @@ int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance)
 
     while (solved && max >= lb)
     {
-        RCPSModel2Glucose transformer;
+        //RCPSModel2Glucose transformer;
+        RCPSModel2Minisat transformer;
         Solver solver(&model, &instance, &transformer);
         transformer.transformModel2Solver(model, solver);
         if (modelTimeConstraint(instance.getLowerBound(),instance.getUpperBound(),

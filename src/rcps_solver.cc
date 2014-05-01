@@ -4,8 +4,7 @@
 #include "rcps_parser.hh"
 #include "rcps_graph.hh"
 #include "rcps_sat_model.hh"
-#include "rcps_model_to_glucose.hh"
-#include "core/Solver.h"
+//#include "rcps_model_to_glucose.hh"
 #include "rcps_optimizer.hh"
 
 #define UNUSED(x) (void)(x)

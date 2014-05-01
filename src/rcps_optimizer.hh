@@ -1,7 +1,7 @@
 #ifndef RCPS_MODEL_OPTIMIZER
 #define RCPS_MODEL_OPTIMIZER
 
-#include "core/Solver.h"
+#include "minisat/core/Solver.h"
 #include "rcps_sat_model.hh"
 #include "rcps_instance.hh"
 
