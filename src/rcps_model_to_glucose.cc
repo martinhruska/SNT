@@ -1,5 +1,7 @@
 #include "rcps_model_to_glucose.hh"
 
+#include "mtl/Vec.h"
+
 #include <iostream>
 
 using namespace RCPSSolver;

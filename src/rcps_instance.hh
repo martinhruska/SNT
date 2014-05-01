@@ -37,7 +37,7 @@ private: // private data members
     int mpmTime_;
 
 public: // public member functions
-    inline int getDemand(JobType act, ResourceType res)
+    int getDemand(JobType act, ResourceType res) const
         {return resourceDemands_[act][res];}
     inline void setDemand(JobType act, ResourceType res, int val)
         {resourceDemands_[act][res] = val;}
@@ -88,6 +88,8 @@ public: // public member functions
         return durations_[pos];
     }
     int getJobsNumber() const {return jobs_;}
+    int getResourcesNumber() const {return resources_;}
+    const Vector& getResourcesAval() const {return resourcesAval_;}
 
 public: // friend functions
     //friend int parse(RCPSInstance& instance, const char* source);

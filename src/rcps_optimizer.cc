@@ -4,8 +4,8 @@
 
 #include "rcps_model_to_glucose.hh"
 
-
 using namespace RCPSSolver;
+using namespace Glucose;
 
 int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance)
 {
@@ -17,7 +17,7 @@ int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance)
     while (solved && max >= lb)
     {
         RCPSModel2Glucose transformer;
-        Glucose::Solver solver;
+        Solver solver(&model, &instance, &transformer);
         transformer.transformModel2Solver(model, solver);
         if (modelTimeConstraint(instance.getLowerBound(),instance.getUpperBound(),
             model, instance))

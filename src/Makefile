@@ -1,12 +1,13 @@
 CC=g++
-CFLAGS=-Wall -Wextra -std=c++11 -isystem sat_solver
+CFLAGS=-Wall -Wextra -std=c++11 -isystem sat_solver/glucose
 #CFLAGS=-Wall -Wextra -std=c++11 -Isat_solver
 MAIN=rcps_solver
 PARSER=rcps_parser
 GRAPH=rcps_graph
 FWALG=rcps_floyd_warshall
 SAT=rcps_sat_model
-SAT_SOLVER=sat_solver/core/Solver
+SAT_GLUCOSE=sat_solver/glucose
+SAT_SOLVER=$(SAT_GLUCOSE)/core/Solver
 MODEL=rcps_model_to_glucose
 OPTIMIZER=rcps_optimizer
 
@@ -33,9 +34,12 @@ $(MODEL).o: $(MODEL).cc
 $(OPTIMIZER).o: $(OPTIMIZER).cc
 	$(CC) $(CFLAGS) $(OPTIMIZER).cc -c
 
-$(SAT_SOLVER).o:
-	cd sat_solver/core && make
+$(SAT_SOLVER).o: force_look
+	cd $(SAT_GLUCOSE)/core && make
 
 clean:
 	cd sat_solver/core && make clean
 	rm *.o $(MAIN)
+
+force_look:
+	true
