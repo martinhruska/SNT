@@ -24,8 +24,8 @@ public: // public constructors
     {}
 public: // public functions
     int transformModel2Solver(RCPSSATModel& model, Minisat::Solver& solver);
-    ReverseVarMap& getReverseVar() {return createdVarsReverse_;}
-    VarMap& getVarMap() {return createdVars_;}
+    const ReverseVarMap& getReverseVar() {return createdVarsReverse_;}
+    const VarMap& getVarMap() {return createdVars_;}
 
 private: // private function
     int transformClauseDb2Solver(ClauseDb& clauseDb, Minisat::Solver& solver);

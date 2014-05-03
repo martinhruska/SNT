@@ -64,6 +64,7 @@ int RCPSSolver::storeGraphValuesToInstance(const PrecedenceGraph& graph,
     int lastJob = graph.size_-1;
     // lower bound is time between first and last activity
     int lb = graph.graph_[0][lastJob];
+    std::cout << "LOWER BOUND " << lastJob << " lastJob " << lastJob << '\n';
     // time between the first and the last activity
     instance.setLowerBound(lb);
 

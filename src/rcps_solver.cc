@@ -25,6 +25,7 @@ int main(int argc, char** argv)
     const char *inputFile = argv[infilePos];
     RCPSInstance instance;
     int res = Parser::parse(instance, inputFile);
+    std::cout << "parsed\n";
     if (res)
     {
         if (res == 2)
@@ -42,18 +43,16 @@ int main(int argc, char** argv)
     {
         std::cerr << "Cannot parser to precedence graph\n";
     }
+    std::cout << "parsed graph\n";
     rcpsFloydWarshall(precGraph);
+    std::cout << "warshall\n";
     storeGraphValuesToInstance(precGraph,instance);
+    std::cout << "graph stored\n";
+    //Parser::toString(instance);
     RCPSSATModel model;
     createSATmodelFromRCPS(model, instance);
-    if (modelTimeConstraint(instance.getLowerBound(),instance.getUpperBound(),
-            model, instance))
-    {
-        std::cerr << "It is not possible to solve problem under lower bound" << std::endl;
-        return EXIT_SUCCESS;
-    }
-
-   
+    std::cout << "model created\n";
+       
     RCPSOptimizer::optimize(model, instance);
     //printModel(model);
     //Parser::toString(instance);

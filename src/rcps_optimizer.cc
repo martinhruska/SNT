@@ -22,13 +22,16 @@ int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance)
         //RCPSModel2Glucose transformer;
         RCPSModel2Minisat transformer;
         Solver solver(&model, &instance, &transformer);
-        transformer.transformModel2Solver(model, solver);
-        if (modelTimeConstraint(instance.getLowerBound(),instance.getUpperBound(),
+        std::cout << "transforming\n";
+        if (modelTimeConstraint(max, lastMax,
             model, instance))
         {
             break;
         }
+        transformer.transformModel2Solver(model, solver);
+        printModel(model);
         std::cout << "transformed\n";
+        std::cout << "START SOLVING\n";
         solved = solver.solve();
         std::cout << "Max: " << max << " [" << (solved==true) << "]\n";
         lastMax = max;

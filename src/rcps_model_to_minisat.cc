@@ -48,7 +48,6 @@ int RCPSModel2Minisat::transformClauseDb2Solver(ClauseDb& clauseDb,
             }
             gClause.push(Minisat::mkLit(var, !l.sign));
         }
-        std::cout << "adding clause\n";
         solver.addClause(gClause);
     }
 

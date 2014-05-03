@@ -180,10 +180,11 @@ bool Solver::addClause_(vec<Lit>& ps)
         uncheckedEnqueue(ps[0]);
         return ok = (propagate() == CRef_Undef);
     }
-    else{
+    else {
         CRef cr = ca.alloc(ps, false);
         clauses.push(cr);
         attachClause(cr);
+        //std::cout << "ADDED3 clause " << ca.size() << " " << ca[cr] << '\n';
     }
 
     return true;
@@ -314,10 +315,13 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
 
     do{
         assert(confl != CRef_Undef); // (otherwise should be UIP)
+        //std::cout << "ANALYZE1\n";
         Clause& c = ca[confl];
+        //std::cout << "ANALYZE2 " << var(p) << " " << c << " " << confl << " " << ca.size() << '\n';
 
         if (c.learnt())
             claBumpActivity(c);
+        //std::cout << "ANALYZE3\n";
 
         for (int j = (p == lit_Undef) ? 0 : 1; j < c.size(); j++){
             Lit q = c[j];
@@ -496,6 +500,7 @@ void Solver::uncheckedEnqueue(Lit p, CRef from)
 {
     assert(value(p) == l_Undef);
     assigns[var(p)] = lbool(!sign(p));
+   //std::cout << "VARADATA ENTRY " << var(p) << " " << from << '\n';
     vardata[var(p)] = mkVarData(from, decisionLevel());
     trail.push_(p);
 }
@@ -506,66 +511,74 @@ CRef Solver::findCover(Lit p)
     const RCPSSolver::Vector resTemp = rcpsInstance->getResourcesAval();
     RCPSSolver::Vector resources(resTemp.begin(), resTemp.end());
     std::vector<vec<Lit>> clausesVec(resTemp.size());
-    int time = (rcpsModel->getProcessVars()[
-        rcpsAdapter->getReverseVar()[var(p)]]).time;
+    int time = (rcpsModel->getProcessVars().at( // get time of given job
+        rcpsAdapter->getReverseVar().at(var(p)))).time;
+
+    std::cout << "Finding cover\n";
+        printAssgn();
 
     for (auto varDbItem : rcpsModel->getProcessVars())
     { // check whether some resources is no exceed
         int rcpsVar = varDbItem.first;
+        if (!rcpsAdapter->getVarMap().count(rcpsVar))
+        { // process var has not been needed in any formula
+            continue;
+        }
+
         RCPSSolver::JobType job = varDbItem.second.job;
         int jobTime = varDbItem.second.time;
-        Var gvar = rcpsAdapter->getVarMap()[rcpsVar];
+        Var gvar = rcpsAdapter->getVarMap().at(rcpsVar);
 
+        printAssgn();
         if ((time == jobTime && value(gvar) == l_True) || gvar == var(p))
         {
             for (int res=0; res < rcpsInstance->getResourcesNumber(); ++res)
             {
                 const int demand = rcpsInstance->getDemand(job,res);
                 if (demand > 0)
-                {
+                { // jobs wants this resource
                     resources[res] -= demand;
                     clausesVec[res].push(mkLit(gvar,true));
-                    std::cout << " ADD JOB " << job << " " << " resource " << res << " " << resources[res] - demand << " " << 
-                    (value(gvar) == l_Undef)<< std::endl;
                 }
 
                 if (resources[res] < 0)
                 { // resources exceed
-                    for(int i=0; i< clausesVec[res].size(); ++i)
-                    {
-                        Lit lit = clausesVec[res][i];
-                        int v = rcpsAdapter->getReverseVar()[var(lit)];
-                    }
+                    std::cout << "Added clause0:\n";
+                    printClause(clausesVec[res]);
+                    printAssgn();
 
                     //bool ok = addClause(clausesVec[res]);
                     // adding clause to database
                     CRef cr = ca.alloc(clausesVec[res], false);
                     clauses.push(cr);
                     attachClause(cr);
-                    //printClause(cr);
-                    for(int i=0; i< ca[cr].size(); ++i)
-                    {
-                        Lit lit = ca[cr][i];
-                        int v = rcpsAdapter->getReverseVar()[var(lit)];
-                    }
-
+                    
+                    std::cout << "Returning conflict clause\n";
                     return cr;
                 }
-                else if (gvar == var(p) && value(gvar) != l_True)
+                /*
+                else if (gvar == var(p) && value(gvar) != l_True && demand > 0)
                 {
                     resources[res] += demand;
                     clausesVec[res].pop();
                 }
+                */
             }
         }
     }
 
     for (auto varDbItem : rcpsModel->getProcessVars())
-    {
+    { // check which jobs cannot be assigned at the current time
         int rcpsVar = varDbItem.first;
+        if (!rcpsAdapter->getVarMap().count(rcpsVar))
+        { // process var has not been needed in any formula
+            continue;
+        }
+
         const RCPSSolver::JobType job = varDbItem.second.job;
         int jobTime = varDbItem.second.time;
-        Var gvar = rcpsAdapter->getVarMap()[rcpsVar];
+        Var gvar = rcpsAdapter->getVarMap().at(rcpsVar);
+
         if ((time == jobTime) && value(gvar) == l_Undef)
         { // check whether job can be assigned to this time
             for (int res=0; res < rcpsInstance->getResourcesNumber(); ++res)
@@ -574,32 +587,90 @@ CRef Solver::findCover(Lit p)
 
                 if (resources[res]-demand < 0)
                 {
+                    Lit litAssign = mkLit(gvar, true);
 
-                    for(int i=0; i< clausesVec[res].size(); ++i)
-                    {
-                        Lit lit = clausesVec[res][i];
-                        int v = rcpsAdapter->getReverseVar()[var(lit)];
-                        int jobres = rcpsModel->getProcessVars()[v].job;
-                        std::cout << "JobRes " << jobres << " res " << res << '\n';
-                    }
+                    clausesVec[res].push(litAssign);
+                    
+                    std::cout << "Added clauses 1 for:" << res << "\n";
+                    printClause(clausesVec[res]);
 
-                    Lit temp = mkLit(gvar, true);
-                    uncheckedEnqueue(temp);
-
-                    std::cout << "Job " << job << " resource " << res << " " << resources[res] - demand << " " << 
-                    (value(gvar) == l_Undef)<< std::endl;
-                    clausesVec[res].push(mkLit(gvar,true));
                     // add cover clause to the database
-                    CRef cr = ca.alloc(clausesVec[res], false); // TODO am I adding really minimal cover clause?
+                    CRef cr = ca.alloc(clausesVec[res], true); // TODO am I adding really minimal cover clause?
                     clauses.push(cr);
                     attachClause(cr);
+                    vec<Lit> temp;
+                    temp.push(litAssign);
+                    
+                    // assign value
+                    printAssgn();
+                    //uncheckedEnqueue(litAssign, cr);
+                    assigns[var(litAssign)] = l_False;
+                    vardata[var(litAssign)] = mkVarData(cr, decisionLevel());
+                    trail.push_(litAssign);
+                    printAssgn();
+
                     clausesVec[res].pop();
                 }
             }
         }
     }
-    //std::cout << "No conflict\n";
+
     return confl;
+}
+
+template <class T>
+void Solver::printClause (T& clause)
+{
+    for(int i=0; i< clause.size(); ++i)
+    { // just debbug info
+        Lit lit = clause[i];
+        int v = rcpsAdapter->getReverseVar().at(var(lit));
+        int jobres = -1;
+        int t = -1;
+        if (rcpsModel->getProcessVars().count(v))
+        {
+            jobres = rcpsModel->getProcessVars().at(v).job;
+            t = rcpsModel->getProcessVars().at(v).time;
+        }
+        else
+        {
+            jobres = rcpsModel->getStartVars().at(v).job;
+            t = rcpsModel->getStartVars().at(v).time;
+        }
+        if (sign(lit))
+            std::cout << "-";
+        //std::cout << "\nISHERE " << rcpsModel->getStartVars().count(v) << " " << rcpsModel->getProcessVars().count(v) << '\n';
+        std::cout << v << " [" << jobres << ',' << t << "]" << " \\/ ";
+        //std::cout << "JobRes " << jobres << " res " << res << '\n';
+    }
+    std::cout << '\n';
+}
+
+void Solver::printAssgn()
+{
+    for (int i=0; i < trail.size(); ++i)
+    {
+        Lit temp = trail[i];
+        const int v = rcpsAdapter->getReverseVar().at(var(temp));
+        int jobres = -1;
+        int t = -1;
+        if (rcpsModel->getProcessVars().count(v))
+        {
+            jobres = rcpsModel->getProcessVars().at(v).job;
+            t = rcpsModel->getProcessVars().at(v).time;
+        }
+        else
+        {
+            jobres = rcpsModel->getStartVars().at(v).job;
+            t = rcpsModel->getStartVars().at(v).time;
+        }
+        if (assigns[var(temp)] == l_True)
+            std::cout << "+";
+        else if (assigns[var(temp)] == l_False)
+            std::cout << "-";
+        std::cout << v << " [" << jobres << ',' << t << "]" << "; ";
+    }
+    std::cout << "\n";   
 }
 
 /*_________________________________________________________________________________________________
@@ -624,7 +695,7 @@ CRef Solver::propagate()
         Watcher        *i, *j, *end;
         num_props++;
 
-        std::cout << "PROPGATING\n";
+        //std::cout << "PROPGATING\n";
         for (i = j = (Watcher*)ws, end = i + ws.size();  i != end;){
             // Try to avoid inspecting the clause:
             Lit blocker = i->blocker;
@@ -657,26 +728,29 @@ CRef Solver::propagate()
             *j++ = w;
             if (value(first) == l_False){
                 confl = cr;
+                std::cout << "problem ";
+                printClause(ca[confl]);
                 qhead = trail.size();
                 // Copy the remaining watches:
                 while (i < end)
                     *j++ = *i++;
             }else
             {
-                int varId = rcpsAdapter->getReverseVar()[var(first)];
-                if (rcpsModel->getProcessVars().count(varId))
+                uncheckedEnqueue(first, cr);
+                int varId = rcpsAdapter->getReverseVar().at(var(first));
+                if (rcpsModel->getProcessVars().count(varId) && value(var(first)) == l_True)
                 {
-                    std::cout << "Covering \n";
                     CRef coverConfl = findCover(first);
                     if  (coverConfl != CRef_Undef)
                     {
-                        std::cout << "COVERED\n";
-                        //return coverConfl; // TODO or jump to nextclause
+                        //std::cout << "COVERED\n";
+                        return coverConfl; // TODO or jump to nextclause
+                        /*
+                        confl = coverConfl;
                         goto NextClause;
+                        */
                     }
-                    std::cout << "NOT COVERED\n";
                 }
-                uncheckedEnqueue(first, cr);
             }
 
         NextClause:;
@@ -685,7 +759,7 @@ CRef Solver::propagate()
     }
     propagations += num_props;
     simpDB_props -= num_props;
-    std::cout << "PROPAGATED\n";
+    //std::cout << "PROPAGATED\n";
 
     return confl;
 }
@@ -835,30 +909,40 @@ lbool Solver::search(int nof_conflicts)
     starts++;
 
     for (;;){
+        std::cout << "SEARCH\n";
         CRef confl = propagate();
         if (confl != CRef_Undef){
+            std::cout << "CONFLICT\n";
+            printClause(ca[confl]);
+            printAssgn();
             // CONFLICT
             conflicts++; conflictC++;
-            //std::coutionLevel() << "\n";
+            //std::cout << "CONFLICT 1\n";
             if (decisionLevel() == 0)
             {
                 std::cout << "No Decision level" << std::endl;
                     return l_False;
             }
+            //std::cout << "CONFLICT 2\n";
 
             learnt_clause.clear();
+            //std::cout << "CONFLICT 3\n";
             analyze(confl, learnt_clause, backtrack_level);
+            //std::cout << "CONFLICT 4\n";
             cancelUntil(backtrack_level);
 
+            //std::cout << "CONFLICT 5\n";
             if (learnt_clause.size() == 1){
                 uncheckedEnqueue(learnt_clause[0]);
             }else{
                 CRef cr = ca.alloc(learnt_clause, true);
                 learnts.push(cr);
                 attachClause(cr);
+                //std::cout << "ADDED2 clause " << ca.size() << " " <<ca[cr] << '\n';
                 claBumpActivity(ca[cr]);
                 uncheckedEnqueue(learnt_clause[0], cr);
             }
+            //std::cout << "CONFLICT 4\n";
 
             varDecayActivity();
             claDecayActivity();
@@ -877,6 +961,7 @@ lbool Solver::search(int nof_conflicts)
 
         }else{
             // NO CONFLICT
+            //std::cout << "NO CONFLICT\n";
             if ((nof_conflicts >= 0 && conflictC >= nof_conflicts) || !withinBudget()){
                 // Reached bound on number of conflicts:
                 progress_estimate = progressEstimate();
@@ -919,6 +1004,7 @@ lbool Solver::search(int nof_conflicts)
 
             // Increase decision level and enqueue 'next'
             newDecisionLevel();
+            //std::cout << "UNCHECKED from decision\n";
             uncheckedEnqueue(next);
         }
     }
@@ -1060,20 +1146,23 @@ static Var mapVar(Var x, vec<Var>& map, Var& max)
 void Solver::toDimacs(FILE* f, Clause& c, vec<Var>& map, Var& max)
 {
     if (satisfied(c)) return;
-
+/*
     for (int i = 0; i < c.size(); i++)
         if (value(c[i]) != l_False)
             fprintf(f, "%s%d ", sign(c[i]) ? "-" : "", mapVar(var(c[i]), map, max)+1);
     fprintf(f, "0\n");
+    */
 }
 
 
 void Solver::toDimacs(const char *file, const vec<Lit>& assumps)
 {
     FILE* f = fopen(file, "wr");
+    /*
     if (f == NULL)
         fprintf(stderr, "could not open file %s\n", file), exit(1);
     toDimacs(f, assumps);
+    */
     fclose(f);
 }
 
@@ -1082,7 +1171,7 @@ void Solver::toDimacs(FILE* f, const vec<Lit>& assumps)
 {
     // Handle case when solver is in contradictory state:
     if (!ok){
-        fprintf(f, "p cnf 1 2\n1 0\n-1 0\n");
+        //fprintf(f, "p cnf 1 2\n1 0\n-1 0\n");
         return; }
 
     vec<Var> map; Var max = 0;
@@ -1105,18 +1194,18 @@ void Solver::toDimacs(FILE* f, const vec<Lit>& assumps)
     // Assumptions are added as unit clauses:
     cnt += assumps.size();
 
-    fprintf(f, "p cnf %d %d\n", max, cnt);
+    //fprintf(f, "p cnf %d %d\n", max, cnt);
 
     for (int i = 0; i < assumps.size(); i++){
         assert(value(assumps[i]) != l_False);
-        fprintf(f, "%s%d 0\n", sign(assumps[i]) ? "-" : "", mapVar(var(assumps[i]), map, max)+1);
+        //fprintf(f, "%s%d 0\n", sign(assumps[i]) ? "-" : "", mapVar(var(assumps[i]), map, max)+1);
     }
 
     for (int i = 0; i < clauses.size(); i++)
         toDimacs(f, ca[clauses[i]], map, max);
 
-    if (verbosity > 0)
-        printf("Wrote DIMACS with %d variables and %d clauses.\n", max, cnt);
+    //if (verbosity > 0)
+    //    printf("Wrote DIMACS with %d variables and %d clauses.\n", max, cnt);
 }
 
 
@@ -1124,6 +1213,7 @@ void Solver::printStats() const
 {
     double cpu_time = cpuTime();
     double mem_used = memUsedPeak();
+    /*
     printf("restarts              : %"PRIu64"\n", starts);
     printf("conflicts             : %-12"PRIu64"   (%.0f /sec)\n", conflicts   , conflicts   /cpu_time);
     printf("decisions             : %-12"PRIu64"   (%4.2f %% random) (%.0f /sec)\n", decisions, (float)rnd_decisions*100 / (float)decisions, decisions   /cpu_time);
@@ -1131,6 +1221,7 @@ void Solver::printStats() const
     printf("conflict literals     : %-12"PRIu64"   (%4.2f %% deleted)\n", tot_literals, (max_literals - tot_literals)*100 / (double)max_literals);
     if (mem_used != 0) printf("Memory used           : %.2f MB\n", mem_used);
     printf("CPU time              : %g s\n", cpu_time);
+    */
 }
 
 

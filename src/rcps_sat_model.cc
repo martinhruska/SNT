@@ -13,7 +13,6 @@ int RCPSSolver::createSATmodelFromRCPS(RCPSSATModel &model,
     // creates database of variable that will be futher used
     createVarDb(model, instance);
     const int jobsNumber = instance.getJobsNumber();
-    
     for (int job=0; job < jobsNumber; ++job)
     { // create consistency clauses
         const int eStart = instance.getEStart(job);
@@ -101,13 +100,13 @@ int RCPSSolver::modelTimeConstraint(const int newMaxTime, const int lastMaxTime,
     for (int time = newMaxTime; time < lastMaxTime; ++time)
     {
         if (!model.startVarMap_.count(lastJob) ||
-                !model.startVarMap_[lastJob].count(time))
+                !model.startVarMap_.at(lastJob).count(time))
         {
             return 2;
         }
         model.clausesTimeCons_.push_back(Clause());
         Literal lit = createLiteral(
-            model.startVarMap_[lastJob][time], false);
+            model.startVarMap_.at(lastJob).at(time), false);
         model.clausesTimeCons_.back().push_back(lit);
     }
 
@@ -152,12 +151,27 @@ int RCPSSolver::createVarDb(RCPSSATModel& model,
 
 void RCPSSolver::printModel(RCPSSATModel& model)
 {
+    std::cout << "Print start values: \n";
+    printVarDb(model.startVarDb_);
+    std::cout << "Print process values: \n";
+    printVarDb(model.processVarDb_);
     std::cout << "Print consistency: ";
     printClauseDb(model.clausesConsistency_);
     std::cout << "Print precedence: ";
     printClauseDb(model.clausesPrecedence_);
+    std::cout << "Print time cons: ";
+    printClauseDb(model.clausesTimeCons_);
     std::cout << "Print start: ";
     printClauseDb(model.clausesStart_);
+}
+
+void RCPSSolver::printVarDb(VariableDb& vars)
+{
+    for (auto i : vars)
+    {
+        std::cout << i.first << " [" <<i.second.job << "," << i.second.time << "], ";
+    }
+    std::cout << '\n';
 }
 
 void RCPSSolver::printClauseDb(ClauseDb& clauseDb)
@@ -166,9 +180,15 @@ void RCPSSolver::printClauseDb(ClauseDb& clauseDb)
     {
         for (auto lit : clause)
         {
-            std::cout << lit.var->id << " || ";
+            int v = lit.var->id;
+            int jobres = lit.var->job;
+            int t = lit.var->time;
+            if (!lit.sign)
+                std::cout << "-";
+            std::cout << v << " [" << jobres << ',' << t << "]" << " \\/ ";
+            //std::cout << lit.var->id << " \\/ ";
         }
-        std::cout << " && ";
+        std::cout << " && \n";
     }
     std::cout << '\n';
 }

@@ -365,8 +365,8 @@ int Parser::parseDemandLine(RCPSInstance& instance, std::string& line)
 
 int Parser::parseResourcesLine(RCPSInstance& instance, std::string& line)
 {
-    char* cLine;
-    char* pEnd;
+    char* cLine = NULL;
+    char* pEnd = NULL;
     for(int i = 0; i < instance.resources_; ++i)
     {
         cLine = pEnd;
@@ -444,8 +444,8 @@ void Parser::toString(RCPSInstance& instance)
     std::cout << '\n';
 
     std::cout << "Additional information \n";
-    std::cout << "Upper boud " << instance.upperBound_ << '\n';
-    std::cout << "Lower boud " << instance.upperBound_ << '\n';
+    std::cout << "Upper bound " << instance.upperBound_ << '\n';
+    std::cout << "Lower bound " << instance.lowerBound_ << '\n';
     std::cout << "Project number " << instance.projNum_ << '\n';
     std::cout << "Real jobs " << instance.realJobs_ << '\n';
     std::cout << "Rel date " << instance.relDate_ << '\n';
