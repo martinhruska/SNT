@@ -179,7 +179,8 @@ bool Solver::addClause_(vec<Lit>& ps)
     else if (ps.size() == 1){
         uncheckedEnqueue(ps[0]);
         return ok = (propagate() == CRef_Undef);
-    }else{
+    }
+    else{
         CRef cr = ca.alloc(ps, false);
         clauses.push(cr);
         attachClause(cr);
@@ -509,12 +510,13 @@ CRef Solver::findCover(Lit p)
         rcpsAdapter->getReverseVar()[var(p)]]).time;
 
     for (auto varDbItem : rcpsModel->getProcessVars())
-    {
+    { // check whether some resources is no exceed
         int rcpsVar = varDbItem.first;
         RCPSSolver::JobType job = varDbItem.second.job;
         int jobTime = varDbItem.second.time;
         Var gvar = rcpsAdapter->getVarMap()[rcpsVar];
-        if ((time == jobTime) && value(gvar) == l_True || gvar == var(p))
+
+        if ((time == jobTime && value(gvar) == l_True) || gvar == var(p))
         {
             for (int res=0; res < rcpsInstance->getResourcesNumber(); ++res)
             {
@@ -522,11 +524,13 @@ CRef Solver::findCover(Lit p)
                 if (demand > 0)
                 {
                     resources[res] -= demand;
-                    clausesVec[res].push(mkLit(gvar,false));
+                    clausesVec[res].push(mkLit(gvar,true));
+                    std::cout << " ADD JOB " << job << " " << " resource " << res << " " << resources[res] - demand << " " << 
+                    (value(gvar) == l_Undef)<< std::endl;
                 }
 
                 if (resources[res] < 0)
-                {
+                { // resources exceed
                     for(int i=0; i< clausesVec[res].size(); ++i)
                     {
                         Lit lit = clausesVec[res][i];
@@ -534,6 +538,7 @@ CRef Solver::findCover(Lit p)
                     }
 
                     //bool ok = addClause(clausesVec[res]);
+                    // adding clause to database
                     CRef cr = ca.alloc(clausesVec[res], false);
                     clauses.push(cr);
                     attachClause(cr);
@@ -546,10 +551,54 @@ CRef Solver::findCover(Lit p)
 
                     return cr;
                 }
+                else if (gvar == var(p) && value(gvar) != l_True)
+                {
+                    resources[res] += demand;
+                    clausesVec[res].pop();
+                }
             }
         }
     }
 
+    for (auto varDbItem : rcpsModel->getProcessVars())
+    {
+        int rcpsVar = varDbItem.first;
+        const RCPSSolver::JobType job = varDbItem.second.job;
+        int jobTime = varDbItem.second.time;
+        Var gvar = rcpsAdapter->getVarMap()[rcpsVar];
+        if ((time == jobTime) && value(gvar) == l_Undef)
+        { // check whether job can be assigned to this time
+            for (int res=0; res < rcpsInstance->getResourcesNumber(); ++res)
+            {
+                const int demand = rcpsInstance->getDemand(job,res);
+
+                if (resources[res]-demand < 0)
+                {
+
+                    for(int i=0; i< clausesVec[res].size(); ++i)
+                    {
+                        Lit lit = clausesVec[res][i];
+                        int v = rcpsAdapter->getReverseVar()[var(lit)];
+                        int jobres = rcpsModel->getProcessVars()[v].job;
+                        std::cout << "JobRes " << jobres << " res " << res << '\n';
+                    }
+
+                    Lit temp = mkLit(gvar, true);
+                    uncheckedEnqueue(temp);
+
+                    std::cout << "Job " << job << " resource " << res << " " << resources[res] - demand << " " << 
+                    (value(gvar) == l_Undef)<< std::endl;
+                    clausesVec[res].push(mkLit(gvar,true));
+                    // add cover clause to the database
+                    CRef cr = ca.alloc(clausesVec[res], false); // TODO am I adding really minimal cover clause?
+                    clauses.push(cr);
+                    attachClause(cr);
+                    clausesVec[res].pop();
+                }
+            }
+        }
+    }
+    //std::cout << "No conflict\n";
     return confl;
 }
 
@@ -575,6 +624,7 @@ CRef Solver::propagate()
         Watcher        *i, *j, *end;
         num_props++;
 
+        std::cout << "PROPGATING\n";
         for (i = j = (Watcher*)ws, end = i + ws.size();  i != end;){
             // Try to avoid inspecting the clause:
             Lit blocker = i->blocker;
@@ -616,11 +666,15 @@ CRef Solver::propagate()
                 int varId = rcpsAdapter->getReverseVar()[var(first)];
                 if (rcpsModel->getProcessVars().count(varId))
                 {
+                    std::cout << "Covering \n";
                     CRef coverConfl = findCover(first);
                     if  (coverConfl != CRef_Undef)
                     {
-                        return coverConfl;
+                        std::cout << "COVERED\n";
+                        //return coverConfl; // TODO or jump to nextclause
+                        goto NextClause;
                     }
+                    std::cout << "NOT COVERED\n";
                 }
                 uncheckedEnqueue(first, cr);
             }
@@ -631,6 +685,7 @@ CRef Solver::propagate()
     }
     propagations += num_props;
     simpDB_props -= num_props;
+    std::cout << "PROPAGATED\n";
 
     return confl;
 }
@@ -784,9 +839,10 @@ lbool Solver::search(int nof_conflicts)
         if (confl != CRef_Undef){
             // CONFLICT
             conflicts++; conflictC++;
+            //std::coutionLevel() << "\n";
             if (decisionLevel() == 0)
             {
-                std::cout << "No decision level\n";
+                std::cout << "No Decision level" << std::endl;
                     return l_False;
             }
 

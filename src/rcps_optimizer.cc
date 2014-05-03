@@ -28,6 +28,7 @@ int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance)
         {
             break;
         }
+        std::cout << "transformed\n";
         solved = solver.solve();
         std::cout << "Max: " << max << " [" << (solved==true) << "]\n";
         lastMax = max;
