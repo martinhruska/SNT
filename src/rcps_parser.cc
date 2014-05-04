@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
+#include <stdexcept>
 
 using namespace RCPSSolver;
 
