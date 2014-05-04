@@ -1,6 +1,6 @@
 CC=g++
 #CFLAGS=-Wall -Wextra -std=c++11 -isystem sat_solver/minisat/ -Lsat_solver/minisat/build/dynamic/lib -lminisat
-CFLAGS=-Wall -Wextra -std=c++11 -isystem sat_solver/glucose/ -isystem sat_solver/glucose/
+CFLAGS=-Wall -Wextra -std=c++0x -isystem sat_solver/glucose/ -isystem sat_solver/glucose/
 #CFLAGS=-Wall -Wextra -std=c++11 -Isat_solver
 MAIN=rcps_solver
 PARSER=rcps_parser
