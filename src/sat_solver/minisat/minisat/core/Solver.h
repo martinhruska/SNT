@@ -297,13 +297,15 @@ protected:
     RCPSSolver::RCPSSATModel* rcpsModel;
     const RCPSSolver::RCPSInstance* rcpsInstance;
     RCPSSolver::RCPSModel2Minisat* rcpsAdapter;
-    CRef lastCref;
 
 public:
     CRef findCover(Lit p);
     template<class T> void printClause(T& clause);
+    template<class T> void printCont(T& cont);
     void printAssgn();
+    void printModel();
 
+protected:
     // Static helpers:
     //
 

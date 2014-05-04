@@ -266,7 +266,6 @@ bool Solver::addClause_(vec<Lit>& ps)
         return ok = (propagate() == CRef_Undef);
     }else{
         CRef cr = ca.alloc(ps, false);
-        lastCref = cr;
         clauses.push(cr);
         attachClause(cr);
     }
@@ -783,52 +782,195 @@ CRef Solver::findCover(Lit p)
     const RCPSSolver::Vector resTemp = rcpsInstance->getResourcesAval();
     RCPSSolver::Vector resources(resTemp.begin(), resTemp.end());
     std::vector<vec<Lit>> clausesVec(resTemp.size());
-    int time = (rcpsModel->getProcessVars()[
-        rcpsAdapter->getReverseVar()[var(p)]]).time;
+    int time = (rcpsModel->getProcessVars().at( // get time of given job
+        rcpsAdapter->getReverseVar().at(var(p)))).time;
 
     for (auto varDbItem : rcpsModel->getProcessVars())
-    {
+    { // check whether some resources is no exceed
         int rcpsVar = varDbItem.first;
+        if (!rcpsAdapter->getVarMap().count(rcpsVar))
+        { // process var has not been needed in any formula
+            continue;
+        }
+
         RCPSSolver::JobType job = varDbItem.second.job;
         int jobTime = varDbItem.second.time;
-        Var gvar = rcpsAdapter->getVarMap()[rcpsVar];
-        if ((time == jobTime) && value(gvar) == l_True || gvar == var(p))
+        Var gvar = rcpsAdapter->getVarMap().at(rcpsVar);
+
+        if ((time == jobTime && value(gvar) == l_True) || gvar == var(p))
         {
             for (int res=0; res < rcpsInstance->getResourcesNumber(); ++res)
             {
                 const int demand = rcpsInstance->getDemand(job,res);
                 if (demand > 0)
-                {
+                { // jobs wants this resource
                     resources[res] -= demand;
-                    clausesVec[res].push(mkLit(gvar,false));
+                    clausesVec[res].push(mkLit(gvar,true));
                 }
 
                 if (resources[res] < 0)
-                {
-                    for(int i=0; i< clausesVec[res].size(); ++i)
-                    {
-                        Lit lit = clausesVec[res][i];
-                        int v = rcpsAdapter->getReverseVar()[var(lit)];
-                    }
+                { // resources exceed
+                    //std::cout << "Added clause0:\n";
+                    //printClause(clausesVec[res]);
+                    //printAssgn();
 
-                    //bool ok = addClause(clausesVec[res]);
+                    // adding clause to database
                     CRef cr = ca.alloc(clausesVec[res], false);
                     clauses.push(cr);
                     attachClause(cr);
-                    printClause(cr);
-                    for(int i=0; i< ca[cr].size(); ++i)
-                    {
-                        Lit lit = ca[cr][i];
-                        int v = rcpsAdapter->getReverseVar()[var(lit)];
-                    }
-
+                    //addClause(clausesVec[res]);
+                    //std::cout << "Returning conflict clause\n";
+                    //return clauses.last();
                     return cr;
                 }
             }
         }
     }
 
+    for (auto varDbItem : rcpsModel->getProcessVars())
+    { // check which jobs cannot be assigned at the current time
+        int rcpsVar = varDbItem.first;
+        if (!rcpsAdapter->getVarMap().count(rcpsVar))
+        { // process var has not been needed in any formula
+            continue;
+        }
+
+        const RCPSSolver::JobType job = varDbItem.second.job;
+        int jobTime = varDbItem.second.time;
+        Var gvar = rcpsAdapter->getVarMap().at(rcpsVar);
+
+        if ((time == jobTime) && value(gvar) == l_Undef)
+        { // check whether job can be assigned to this time
+            for (int res=0; res < rcpsInstance->getResourcesNumber(); ++res)
+            {
+                const int demand = rcpsInstance->getDemand(job,res);
+
+                if (resources[res]-demand < 0)
+                {
+                    Lit litAssign = mkLit(gvar, true);
+
+                    clausesVec[res].push(litAssign);
+                    
+                    //printAssgn();
+                    //std::cout << "Added clauses 1 for: " << res << "\n";
+                    //printClause(clausesVec[res]);
+
+                    vec<Lit> temp;
+                    temp.push(litAssign);
+                    // add cover clause to the database
+                    CRef cr = ca.alloc(clausesVec[res], false); // TODO am I adding really minimal cover clause?
+                    clauses.push(cr);
+                    attachClause(cr);
+                    //assigns[var(litAssign)] = l_False;
+                    //uncheckedEnqueue(litAssign, cr);
+
+                    //addClause(clausesVec[res]);
+                    //printClause(temp);
+                    //uncheckedEnqueue(litAssign);
+                    //std::cout << "X: " << cr  << "  " << reason(var(litAssign)) << '\n';
+
+                    // assign value
+                    //printAssgn();
+                    /*
+                    assigns[var(litAssign)] = l_False;
+                    //vardata[var(litAssign)] = mkVarData(clauses.last(), decisionLevel());
+                    vardata[var(litAssign)] = mkVarData(cr, decisionLevel());
+                    trail.push_(litAssign);
+                    */
+                    //printAssgn();
+
+                    clausesVec[res].pop();
+                }
+            }
+        }
+    }
+
     return confl;
+}
+
+template <class T>
+void Solver::printClause (T& clause)
+{
+    for(int i=0; i< clause.size(); ++i)
+    { // just debbug info
+        Lit lit = clause[i];
+        int v = rcpsAdapter->getReverseVar().at(var(lit));
+        int jobres = -1;
+        int t = -1;
+        if (rcpsModel->getProcessVars().count(v))
+        {
+            jobres = rcpsModel->getProcessVars().at(v).job;
+            t = rcpsModel->getProcessVars().at(v).time;
+        }
+        else
+        {
+            jobres = rcpsModel->getStartVars().at(v).job;
+            t = rcpsModel->getStartVars().at(v).time;
+        }
+        if (sign(lit))
+            std::cout << "-";
+        std::cout << v << " [" << jobres << ',' << t << "]" << " \\/ ";
+    }
+    std::cout << '\n';
+}
+
+template<class T>
+void Solver::printCont(T& cont)
+{
+    for (int i=0; i < cont.size(); ++i)
+    {
+        Lit temp = cont[i];
+        const int v = rcpsAdapter->getReverseVar().at(var(temp));
+        int jobres = -1;
+        int t = -1;
+        if (rcpsModel->getProcessVars().count(v))
+        {
+            jobres = rcpsModel->getProcessVars().at(v).job;
+            t = rcpsModel->getProcessVars().at(v).time;
+        }
+        else
+        {
+            jobres = rcpsModel->getStartVars().at(v).job;
+            t = rcpsModel->getStartVars().at(v).time;
+        }
+        if (assigns[var(temp)] == l_True)
+            std::cout << "+";
+        else if (assigns[var(temp)] == l_False)
+            std::cout << "-";
+        std::cout << v << " [" << jobres << ',' << t << "]" << "; ";
+    }
+    std::cout << "\n";   
+}
+
+void Solver::printAssgn()
+{
+    printCont(trail);
+}
+void Solver::printModel()
+{
+    for(int i=0; i< model.size(); ++i)
+    { // just debbug info
+        Lit lit = mkLit(i);
+        int v = rcpsAdapter->getReverseVar().at(var(lit));
+        int jobres = -1;
+        int t = -1;
+        if (rcpsModel->getProcessVars().count(v))
+        {
+            jobres = rcpsModel->getProcessVars().at(v).job;
+            t = rcpsModel->getProcessVars().at(v).time;
+        }
+        else
+        {
+            jobres = rcpsModel->getStartVars().at(v).job;
+            t = rcpsModel->getStartVars().at(v).time;
+        }
+        if (model[i] == l_True)
+            std::cout << "+";
+        else if (model[i] == l_False)
+            std::cout << "-";
+        std::cout << v << " [" << jobres << ',' << t << "]" << " \\/ ";
+    }
+    std::cout << '\n';
 }
 
 /*_________________________________________________________________________________________________
@@ -866,16 +1008,16 @@ CRef Solver::propagate()
 	  }
 	  
 	  if(value(imp) == l_Undef) {
-        int varId = rcpsAdapter->getReverseVar()[var(imp)];
-        if (rcpsModel->getProcessVars().count(varId))
+      uncheckedEnqueue(imp,wbin[k].cref);
+      int varId = rcpsAdapter->getReverseVar().at(var(imp));
+      if (rcpsModel->getProcessVars().count(varId) && value(var(imp)) == l_True)
+      {
+        CRef coverConfl = findCover(imp);
+        if  (coverConfl != CRef_Undef)
         {
-            CRef coverConfl = findCover(imp);
-            if  (coverConfl != CRef_Undef)
-            {
-                return coverConfl;
-            }
+          return coverConfl;
         }
-	    uncheckedEnqueue(imp,wbin[k].cref);
+      }
 	  }
 	}
     
@@ -944,21 +1086,22 @@ CRef Solver::propagate()
                 // Copy the remaining watches:
                 while (i < end)
                     *j++ = *i++;
-            }else {
+            }else 
+            {
                 // iterate through assign
-                int varId = rcpsAdapter->getReverseVar()[var(first)];
-                if (rcpsModel->getProcessVars().count(varId))
+                uncheckedEnqueue(first, cr);
+                int varId = rcpsAdapter->getReverseVar().at(var(first));
+                if (rcpsModel->getProcessVars().count(varId) && value(var(first)) == l_True)
                 {
                     CRef coverConfl = findCover(first);
                     if  (coverConfl != CRef_Undef)
                     {
-                        return coverConfl;
+                        //return coverConfl; // TODO or jump to nextclause
+                        confl = coverConfl;
+                        goto NextClause;
                     }
                 }
-                uncheckedEnqueue(first, cr);
-	  
-		
-	    }
+	          }
         NextClause:;
         }
         ws.shrink(i - j);

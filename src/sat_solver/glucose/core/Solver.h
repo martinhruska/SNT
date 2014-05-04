@@ -283,14 +283,6 @@ protected:
     int nbSatCalls,nbUnsatCalls;
     vec<int> assumptionPositions,initialPositions;
 
-    ///////// RCPSSolver members ////////////////
-    RCPSSolver::RCPSSATModel* rcpsModel;
-    const RCPSSolver::RCPSInstance* rcpsInstance;
-    RCPSSolver::RCPSModel2Glucose* rcpsAdapter;
-    CRef lastCref;
-
-    CRef findCover(Lit p);
-
     // Main internal methods:
     //
     void     insertVarOrder   (Var x);                                                 // Insert a variable in the decision order priority queue.
@@ -341,6 +333,19 @@ protected:
     bool     withinBudget     ()      const;
     inline bool isSelector(Var v) {return (incremental && v>nbVarsInitialFormula);}
 
+    ///////// RCPSSolver members ////////////////
+    RCPSSolver::RCPSSATModel* rcpsModel;
+    const RCPSSolver::RCPSInstance* rcpsInstance;
+    RCPSSolver::RCPSModel2Glucose* rcpsAdapter;
+
+public:
+    CRef findCover(Lit p);
+    template<class T> void printClause(T& clause);
+    template<class T> void printCont(T& cont);
+    void printAssgn();
+    void printModel();
+
+protected:    
     // Static helpers:
     //
 

@@ -19,7 +19,7 @@ int RCPSSolver::createSATmodelFromRCPS(RCPSSATModel &model,
         const int lStart = instance.getLStart(job);
         for (int time = eStart; time < lStart; ++time)
         {
-            const int consistTime = time + instance.getDuration(job)-1;
+            const int consistTime = time + instance.getDuration(job);
             for (int l = time; l < consistTime; ++l)
             {
                 Literal litS = createLiteral(
