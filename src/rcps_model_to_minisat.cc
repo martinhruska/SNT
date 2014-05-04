@@ -38,7 +38,7 @@ int RCPSModel2Minisat::transformClauseDb2Solver(ClauseDb& clauseDb,
             Minisat::Var var;
             if (createdVars_.count(l.var->id))
             {
-                var = createdVars_[l.var->id];
+                var = createdVars_.at(l.var->id);
             }
             else
             {

@@ -23,9 +23,9 @@ int RCPSSolver::createSATmodelFromRCPS(RCPSSATModel &model,
             for (int l = time; l < consistTime; ++l)
             {
                 Literal litS = createLiteral(
-                        model.startVarMap_[job][time],false);
+                        model.startVarMap_.at(job).at(time),false);
                 Literal litU = createLiteral(
-                        model.processVarMap_[job][l], true);
+                        model.processVarMap_.at(job).at(l), true);
                 model.clausesConsistency_.push_back(Clause());
                 model.clausesConsistency_.back().push_back(litS);
                 model.clausesConsistency_.back().push_back(litU);
@@ -45,18 +45,21 @@ int RCPSSolver::createSATmodelFromRCPS(RCPSSATModel &model,
             }
 
             const int eStartj = instance.getEStart(jobj);
-            const int precTime = eStarti - instance.getDuration(jobj);
+            const int lStartj = instance.getLStart(jobj);
+            //const int precTime = eStarti - instance.getDuration(jobj);
             for (int time = eStarti; time <= lStarti; ++time)
             {
                 Literal liti = createLiteral(
-                    model.startVarMap_[jobi][time],false);
+                    model.startVarMap_.at(jobi).at(time),false);
                 model.clausesPrecedence_.push_back(Clause());
                 model.clausesPrecedence_.back().push_back(liti);
 
+                const int timeDif = time - instance.getDuration(jobj);
+                const int precTime = ( timeDif < lStartj) ? timeDif : lStartj ;
                 for (int l = eStartj; l <= precTime; ++l)
                 {
                     Literal litj = createLiteral(
-                            model.startVarMap_[jobj][l], true);
+                            model.startVarMap_.at(jobj).at(l), true);
                     model.clausesPrecedence_.back().push_back(litj);
                 }
             }
@@ -71,7 +74,7 @@ int RCPSSolver::createSATmodelFromRCPS(RCPSSATModel &model,
         for (int time=eStart; time <= lStart; ++time)
         {
             Literal lit = createLiteral(
-                model.startVarMap_[job][time], true);
+                model.startVarMap_.at(job).at(time), true);
             model.clausesStart_.back().push_back(lit);
         }
     }
@@ -133,7 +136,7 @@ int RCPSSolver::createVarDb(RCPSSATModel& model,
             const int id = model.getVarCounter();
             model.incrementVarCounter();
             model.startVarDb_.insert(std::make_pair(id,createVariable(id, job, time)));
-            model.startVarMap_[job].insert(std::make_pair(time, &model.startVarDb_[id]));
+            model.startVarMap_.at(job).insert(std::make_pair(time, &model.startVarDb_.at(id)));
         }
 
         const int lFinish = instance.getLFinish(job);
@@ -143,7 +146,7 @@ int RCPSSolver::createVarDb(RCPSSATModel& model,
             const int id = model.getVarCounter();
             model.incrementVarCounter();
             model.processVarDb_.insert(std::make_pair(id,createVariable(id, job, time)));
-            model.processVarMap_[job].insert(std::make_pair(time, &model.processVarDb_[id]));
+            model.processVarMap_.at(job).insert(std::make_pair(time, &model.processVarDb_.at(id)));
         }
     }
     return 0;

@@ -299,6 +299,7 @@ protected:
     RCPSSolver::RCPSModel2Minisat* rcpsAdapter;
     CRef lastCref;
 
+public:
     CRef findCover(Lit p);
     template<class T> void printClause(T& clause);
     void printAssgn();

@@ -12,8 +12,8 @@ using namespace Minisat;
 
 int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance)
 {
-    int lastMax = instance.getUpperBound();
-    int max = lastMax;
+    int max = instance.getUpperBound();
+    int lastMax = max+1;
     const int lb =instance.getLowerBound();
     bool solved = true;
 
@@ -33,7 +33,7 @@ int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance)
         std::cout << "transformed\n";
         std::cout << "START SOLVING\n";
         solved = solver.solve();
-        std::cout << "Max: " << max << " [" << (solved==true) << "]\n";
+        std::cout << "Max: " << max-1 << " [" << (solved==true) << "]\n";
         lastMax = max;
         --max;
         /*
