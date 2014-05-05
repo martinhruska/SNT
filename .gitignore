@@ -20,5 +20,4 @@
 *.pdf
 *.te~
 *.swp
-input/*
 bin/*
