@@ -592,7 +592,7 @@ CRef Solver::findCover(Lit p)
                     CRef cr = ca.alloc(clausesVec[res], false); // TODO am I adding really minimal cover clause?
                     clauses.push(cr);
                     attachClause(cr);
-                    assigns[var(litAssign)] = l_False;
+                    //assigns[var(litAssign)] = l_False;
                     //uncheckedEnqueue(litAssign, cr);
 
                     //addClause(clausesVec[res]);
