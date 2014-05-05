@@ -1,4 +1,4 @@
-CC=g++
+CC=g++-4.8
 #CFLAGS=-Wall -Wextra -std=c++11 -isystem sat_solver/minisat/ -Lsat_solver/minisat/build/dynamic/lib -lminisat
 CFLAGS=-Wall -Wextra -std=c++0x -isystem sat_solver/glucose/ -isystem sat_solver/glucose/
 #CFLAGS=-Wall -Wextra -std=c++11 -Isat_solver
@@ -49,7 +49,7 @@ $(SAT_SOLVER).o: force_look
 #	cd sat_solver/minisat && make
 
 clean:
-	cd sat_solver/core && make clean
+	cd $(SAT_GLUCOSE)/core && make clean
 	rm *.o $(MAIN)
 
 force_look:
