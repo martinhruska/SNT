@@ -37,12 +37,11 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include "core/BoundedQueue.h"
 #include "core/Constants.h"
 
-#include "../../../rcps_sat_model.hh"
-#include "../../../rcps_instance.hh"
-
 namespace RCPSSolver
 {
     class RCPSModel2Glucose;
+    class RCPSSATModel;
+    class RCPSInstance;
 }
 
 namespace Glucose {

@@ -35,6 +35,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include "utils/System.h"
 
 #include "../../../rcps_model_to_glucose.hh"
+#include "../../../rcps_sat_model.hh"
+#include "../../../rcps_instance.hh"
 
 #include <iostream>
 
@@ -169,6 +171,7 @@ Solver::Solver(RCPSSolver::RCPSSATModel* model,
 Solver::Solver() : Solver(NULL,NULL,NULL)
 {
 }
+
 
 Solver::~Solver()
 {
