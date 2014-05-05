@@ -83,17 +83,17 @@ int main(int argc, char** argv)
         
         if (argc == 1)
             printf("Reading from standard input... Use '--help' for help.\n");
-        
+       /* 
         gzFile in = (argc == 1) ? gzdopen(0, "rb") : gzopen(argv[1], "rb");
         if (in == NULL)
             printf("ERROR! Could not open file: %s\n", argc == 1 ? "<stdin>" : argv[1]), exit(1);
-        
         if (S.verbosity > 0){
             printf("============================[ Problem Statistics ]=============================\n");
             printf("|                                                                             |\n"); }
         
         parse_DIMACS(in, S, (bool)strictp);
         gzclose(in);
+        */
         FILE* res = (argc >= 3) ? fopen(argv[2], "wb") : NULL;
         
         if (S.verbosity > 0){
