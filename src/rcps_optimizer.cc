@@ -50,7 +50,7 @@ int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance, i
         double diffSolve =  difftime(time(0), startSolve);
         double diffCycle =  difftime(time(0), startCycle);
         //solver.printModel();
-        std::cout << "Max: " << max-1 << " [" << (solved==true) << "]" 
+        std::cout << "\nMax: " << max-1 << " [" << (solved==true) << "]" 
         << " " << diffSolve << " " << diffCycle << std::endl;
         lastMax = max;
         --max;
