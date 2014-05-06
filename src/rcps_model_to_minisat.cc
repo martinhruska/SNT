@@ -18,8 +18,9 @@ int RCPSModel2Minisat::transformModel2Solver(
     int res2 = transformClauseDb2Solver(model.getPrecedence(), solver);
     int res3 = transformClauseDb2Solver(model.getStart(), solver);
     int res4 = transformClauseDb2Solver(model.getTimeCons(), solver);
+    int res5 = transformClauseDb2Solver(model.getOpt(), solver);
 
-    if (res1 != 0 || res2 != 0 || res3 != 0 || res4 != 0)
+    if (res1 != 0 || res2 != 0 || res3 != 0 || res4 != 0 || res5 != 0)
     {
         return 1;
     }

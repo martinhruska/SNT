@@ -79,6 +79,30 @@ int RCPSSolver::createSATmodelFromRCPS(RCPSSATModel &model,
         }
     }
 
+    model.clausesOpt_ = ClauseDb();
+    /*
+    for (int job=0; job < jobsNumber; ++job)
+    { // create consistency clauses
+        const int eFinish = instance.getEFinish(job);
+        const int lFinish = instance.getLFinish(job);
+        for (int time = eFinish; time < lFinish-1; ++time)
+        {
+            Literal litU = createLiteral(
+                model.processVarMap_.at(job).at(time), false);
+            Literal litU1 = createLiteral(
+                model.processVarMap_.at(job).at(time+1), true);
+            const int d = instance.getDuration(job);
+            Literal litS = createLiteral(
+                model.startVarMap_.at(job).at(time-d+1), true);
+            model.clausesConsistency_.push_back(Clause());
+            model.clausesConsistency_.back().push_back(litU);
+            model.clausesConsistency_.back().push_back(litU1);
+            model.clausesConsistency_.back().push_back(litS);
+        }
+    }
+    */
+
+    // Init db for time constraints
     model.clausesTimeCons_ = ClauseDb();
 
     return 0;
@@ -166,6 +190,8 @@ void RCPSSolver::printModel(RCPSSATModel& model)
     printClauseDb(model.clausesTimeCons_);
     std::cout << "Print start: ";
     printClauseDb(model.clausesStart_);
+    std::cout << "Print optis: ";
+    printClauseDb(model.clausesOpt_);
 }
 
 void RCPSSolver::printVarDb(VariableDb& vars)

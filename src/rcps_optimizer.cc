@@ -22,11 +22,11 @@ int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance, i
     int lastMax = max+1;
     const int lb =instance.getLowerBound();
     bool solved = true;
-    time_t start = time(0);
+    clock_t start = clock();
 
     while (solved || max >= lb)
     {
-        time_t startCycle = time(0);
+        clock_t startCycle = clock();
         #ifdef MINISAT_OPT
             RCPSModel2Minisat transformer;
             Minisat::Solver solver(&model, &instance, &transformer);
@@ -45,24 +45,24 @@ int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance, i
         //printModel(model);
         std::cerr << "transformed\n";
         std::cerr << "START SOLVING\n";
-        time_t startSolve = time(0);
+        clock_t startSolve = clock();
         solved = solver.solve();
-        double diffSolve =  difftime(time(0), startSolve);
-        double diffCycle =  difftime(time(0), startCycle);
+        double diffSolve =  (clock()-startSolve)/CLOCKS_PER_SEC;
+        double diffCycle =  (clock()-startCycle)/CLOCKS_PER_SEC;
         //solver.printModel();
         std::cout << "\nMax: " << max-1 << " [" << (solved==true) << "]" 
         << " " << diffSolve << " " << diffCycle << std::endl;
         lastMax = max;
         --max;
 
-        if (timeout>=0 && difftime(time(0), start) > timeout)
+        if (timeout>=0 && (clock()-start)/CLOCKS_PER_SEC > timeout)
         {
             std::cout << "Timeout\n";
             break;
         }
     }
 
-    std::cout << "Done " << difftime(time(0), start)  << std::endl;
+    std::cout << "Done " << (clock()-start)/CLOCKS_PER_SEC << std::endl;
 
     int res;
     if (lastMax == instance.getLowerBound())

@@ -31,6 +31,7 @@ private: // private data members
     ClauseDb clausesStart_;
     ClauseDb clausesCover_;
     ClauseDb clausesTimeCons_;
+    ClauseDb clausesOpt_;
 
 public: // public constructor
     RCPSSATModel() : varCounter_(0)
@@ -45,6 +46,7 @@ public: // public functions
     ClauseDb& getPrecedence() {return clausesPrecedence_;}
     ClauseDb& getStart() {return clausesStart_;}
     ClauseDb& getTimeCons() {return clausesTimeCons_;}
+    ClauseDb& getOpt() {return clausesOpt_;}
 
     const VariableDb& getStartVars() {return startVarDb_;}
     const VariableDb& getProcessVars() {return processVarDb_;}
