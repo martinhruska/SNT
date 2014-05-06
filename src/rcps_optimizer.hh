@@ -11,9 +11,13 @@ namespace RCPSSolver
 
 class RCPSSolver::RCPSOptimizer
 {
+private:
+    template <class Solver, class Transformer>
+    static int optimize_(RCPSSATModel& model, const RCPSInstance& instance,
+    	int timeout); 
 public:
     static int optimize(RCPSSATModel& model, const RCPSInstance& instance,
-    	int timeout);
+    	int solver, int timeout);
 };
 
 #endif

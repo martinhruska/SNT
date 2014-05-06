@@ -1,22 +1,45 @@
 #include "rcps_optimizer.hh"
 
-#ifdef MINISAT_OPT
+//#ifdef MINISAT_OPT
     #include "minisat/core/Solver.h"
     #include "rcps_model_to_minisat.hh"
-#else
+//#else
     #include "rcps_model_to_glucose.hh"
     #include "core/Solver.h"
-#endif
+//#endif
 
 #include <iostream>
 #include <time.h>
 
 
 using namespace RCPSSolver;
-//using namespace Glucose;
-//using namespace Minisat;
 
-int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance, int timeout)
+/**
+ * Interface for optimization function.
+ * @param solver 0 .. use glucose, 1 .. use minisat
+ */
+int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance,
+  int solver, int timeout)
+{
+    if (solver == 1)
+    {
+        return optimize_<Minisat::Solver, RCPSModel2Minisat>(
+            model, instance, timeout);
+    }
+    else if (solver == 0)
+    {
+        return optimize_<Glucose::Solver, RCPSModel2Glucose>(
+            model, instance, timeout);
+    }
+    else
+    {
+        return -1;
+    }
+}
+
+template<class Solver, class Transformer>
+int RCPSOptimizer::optimize_(RCPSSATModel& model, const RCPSInstance& instance,
+  int timeout)
 {
     int max = instance.getUpperBound();
     int lastMax = max+1;
@@ -27,13 +50,21 @@ int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance, i
     while (solved || max >= lb)
     {
         clock_t startCycle = clock();
-        #ifdef MINISAT_OPT
+        Transformer transformer;
+        Solver solver(&model, &instance, &transformer);
+        //#ifdef MINISAT_OPT
+        /*
+        if (solver)
+        {
             RCPSModel2Minisat transformer;
             Minisat::Solver solver(&model, &instance, &transformer);
-        #else
+        }
+        else
+        {
             RCPSModel2Glucose transformer;
             Glucose::Solver solver(&model, &instance, &transformer);
-        #endif
+        }
+        */
            
         std::cerr << "transforming\n";
         if (modelTimeConstraint(max, lastMax,

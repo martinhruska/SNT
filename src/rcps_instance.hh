@@ -70,6 +70,7 @@ public: // public member functions
     }
 
     void setLowerBound(int val) {lowerBound_ = val;}
+    void setUpperBound(int val) {upperBound_ = val;}
     void setEStart(int job, int val) {eStarts_[job] = val;}
     void setEFinish(int job, int val) {eFinishes_[job] = val;}
     void setLStart(int job, int val) {lStarts_[job] = val;}

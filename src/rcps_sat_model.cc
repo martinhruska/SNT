@@ -80,7 +80,6 @@ int RCPSSolver::createSATmodelFromRCPS(RCPSSATModel &model,
     }
 
     model.clausesOpt_ = ClauseDb();
-    /*
     for (int job=0; job < jobsNumber; ++job)
     { // create consistency clauses
         const int eFinish = instance.getEFinish(job);
@@ -100,8 +99,6 @@ int RCPSSolver::createSATmodelFromRCPS(RCPSSATModel &model,
             model.clausesConsistency_.back().push_back(litS);
         }
     }
-    */
-
     // Init db for time constraints
     model.clausesTimeCons_ = ClauseDb();
 

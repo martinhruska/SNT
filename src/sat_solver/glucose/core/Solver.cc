@@ -773,7 +773,7 @@ void Solver::analyzeFinal(Lit p, vec<Lit>& out_conflict)
 
 void Solver::uncheckedEnqueue(Lit p, CRef from)
 {
-    assert(value(p) == l_Undef);
+    //assert(value(p) == l_Undef);
     assigns[var(p)] = lbool(!sign(p));
     vardata[var(p)] = mkVarData(from, decisionLevel());
     trail.push_(p);
@@ -813,17 +813,10 @@ CRef Solver::findCover(Lit p)
 
                 if (resources[res] < 0)
                 { // resources exceed
-                    //std::cout << "Added clause0:\n";
-                    //printClause(clausesVec[res]);
-                    //printAssgn();
-
                     // adding clause to database
                     CRef cr = ca.alloc(clausesVec[res], false);
                     clauses.push(cr);
                     attachClause(cr);
-                    //addClause(clausesVec[res]);
-                    //std::cout << "Returning conflict clause\n";
-                    //return clauses.last();
                     return cr;
                 }
             }
@@ -853,34 +846,12 @@ CRef Solver::findCover(Lit p)
                     Lit litAssign = mkLit(gvar, true);
 
                     clausesVec[res].push(litAssign);
-                    
-                    //printAssgn();
-                    //std::cout << "Added clauses 1 for: " << res << "\n";
-                    //printClause(clausesVec[res]);
-
-                    vec<Lit> temp;
-                    temp.push(litAssign);
                     // add cover clause to the database
                     CRef cr = ca.alloc(clausesVec[res], false); // TODO am I adding really minimal cover clause?
                     clauses.push(cr);
                     attachClause(cr);
                     //assigns[var(litAssign)] = l_False;
                     //uncheckedEnqueue(litAssign, cr);
-
-                    //addClause(clausesVec[res]);
-                    //printClause(temp);
-                    //uncheckedEnqueue(litAssign);
-                    //std::cout << "X: " << cr  << "  " << reason(var(litAssign)) << '\n';
-
-                    // assign value
-                    //printAssgn();
-                    /*
-                    assigns[var(litAssign)] = l_False;
-                    //vardata[var(litAssign)] = mkVarData(clauses.last(), decisionLevel());
-                    vardata[var(litAssign)] = mkVarData(cr, decisionLevel());
-                    trail.push_(litAssign);
-                    */
-                    //printAssgn();
 
                     clausesVec[res].pop();
                 }

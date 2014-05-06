@@ -138,6 +138,12 @@ Var Solver::newVar(lbool upol, bool dvar)
     assigns  .insert(v, l_Undef);
     vardata  .insert(v, mkVarData(CRef_Undef, 0));
     activity .insert(v, rnd_init_act ? drand(random_seed) * 0.00001 : 0);
+    /*
+    if (rcpsModel->getProcessVars().count(rcpsAdapter->getReverseVar().at(v)))
+    {
+        activity[v] += 30;
+    }
+    */
     seen     .insert(v, 0);
     polarity .insert(v, true);
     user_pol .insert(v, upol);
@@ -541,17 +547,10 @@ CRef Solver::findCover(Lit p)
 
                 if (resources[res] < 0)
                 { // resources exceed
-                    //std::cout << "Added clause0:\n";
-                    //printClause(clausesVec[res]);
-                    //printAssgn();
-
                     // adding clause to database
                     CRef cr = ca.alloc(clausesVec[res], false);
                     clauses.push(cr);
                     attachClause(cr);
-                    //addClause(clausesVec[res]);
-                    //std::cout << "Returning conflict clause\n";
-                    //return clauses.last();
                     return cr;
                 }
             }
@@ -579,37 +578,13 @@ CRef Solver::findCover(Lit p)
                 if (resources[res]-demand < 0)
                 {
                     Lit litAssign = mkLit(gvar, true);
-
                     clausesVec[res].push(litAssign);
-                    
-                    //printAssgn();
-                    //std::cout << "Added clauses 1 for: " << res << "\n";
-                    //printClause(clausesVec[res]);
-
-                    vec<Lit> temp;
-                    temp.push(litAssign);
                     // add cover clause to the database
                     CRef cr = ca.alloc(clausesVec[res], false); // TODO am I adding really minimal cover clause?
                     clauses.push(cr);
                     attachClause(cr);
-                    //assigns[var(litAssign)] = l_False;
-                    //uncheckedEnqueue(litAssign, cr);
-
                     //addClause(clausesVec[res]);
-                    //printClause(temp);
-                    //uncheckedEnqueue(litAssign);
-                    //std::cout << "X: " << cr  << "  " << reason(var(litAssign)) << '\n';
-
-                    // assign value
-                    //printAssgn();
-                    /*
-                    assigns[var(litAssign)] = l_False;
-                    //vardata[var(litAssign)] = mkVarData(clauses.last(), decisionLevel());
-                    vardata[var(litAssign)] = mkVarData(cr, decisionLevel());
-                    trail.push_(litAssign);
-                    */
-                    //printAssgn();
-
+                    //assigns[var(litAssign)] = l_False;
                     clausesVec[res].pop();
                 }
             }
