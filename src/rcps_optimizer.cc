@@ -35,7 +35,7 @@ int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance, i
             Glucose::Solver solver(&model, &instance, &transformer);
         #endif
            
-        std::cout << "transforming\n";
+        std::cerr << "transforming\n";
         if (modelTimeConstraint(max, lastMax,
             model, instance))
         {
@@ -43,8 +43,8 @@ int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance, i
         }
         transformer.transformModel2Solver(model, solver);
         //printModel(model);
-        std::cout << "transformed\n";
-        std::cout << "START SOLVING\n";
+        std::cerr << "transformed\n";
+        std::cerr << "START SOLVING\n";
         time_t startSolve = time(0);
         solved = solver.solve();
         double diffSolve =  difftime(time(0), startSolve);
