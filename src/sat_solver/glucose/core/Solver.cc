@@ -222,7 +222,17 @@ Var Solver::newVar(bool sign, bool dvar)
     return v;
 }
 
+int Solver::addPriority(int v, int p)
+{
+    if (v >= nVars())
+    {
+        return -1;
+    }
 
+    activity[v] += p;
+
+    return 0;
+}
 
 bool Solver::addClause_(vec<Lit>& ps)
 {
@@ -528,7 +538,7 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt,vec<Lit>&selectors, int& o
     int index   = trail.size() - 1;
 
     do{
-        assert(confl != CRef_Undef); // (otherwise should be UIP)
+        //assert(confl != CRef_Undef); // (otherwise should be UIP)
         Clause& c = ca[confl];
 
 	// Special case for binary clauses
@@ -863,7 +873,7 @@ CRef Solver::findCover(Lit p)
 }
 
 template <class T>
-void Solver::printClause (T& clause)
+void Solver::printClauseM (T& clause)
 {
     for(int i=0; i< clause.size(); ++i)
     { // just debbug info
@@ -977,7 +987,6 @@ CRef Solver::propagate()
 	  Lit imp = wbin[k].blocker;
 	  
 	  if(value(imp) == l_False) {
-        printClause(wbin[k].cref);
 	    return wbin[k].cref;
 	  }
 	  
@@ -1009,7 +1018,7 @@ CRef Solver::propagate()
             Lit      false_lit = ~p;
             if (c[0] == false_lit)
                 c[0] = c[1], c[1] = false_lit;
-            assert(c[1] == false_lit);
+            //assert(c[1] == false_lit);
             i++;
 
             // If 0th watch is true, then clause is already satisfied.

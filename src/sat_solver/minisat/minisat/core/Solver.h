@@ -304,6 +304,7 @@ public:
     template<class T> void printCont(T& cont);
     void printAssgn();
     void printModel();
+    int addPriority(int v, int p);
 
 protected:
     // Static helpers:

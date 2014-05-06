@@ -339,10 +339,11 @@ protected:
 
 public:
     CRef findCover(Lit p);
-    template<class T> void printClause(T& clause);
+    template<class T> void printClauseM(T& clause);
     template<class T> void printCont(T& cont);
     void printAssgn();
     void printModel();
+    int addPriority(int v, int p);
 
 protected:    
     // Static helpers:

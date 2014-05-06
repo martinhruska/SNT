@@ -19,10 +19,25 @@ int RCPSModel2Glucose::transformModel2Solver(
     int res3 = transformClauseDb2Solver(model.getStart(), solver);
     int res4 = transformClauseDb2Solver(model.getTimeCons(), solver);
     int res5 = transformClauseDb2Solver(model.getOpt(), solver);
+    int res6 = addPriority(model.getProcessVars(), solver);
 
-    if (res1 != 0 || res2 != 0 || res3 != 0 || res4 != 0 || res5 != 0)
+    if (res1 != 0 || res2 != 0 || res3 != 0 || res4 != 0 || res5 != 0 || res6 != 0)
     {
         return 1;
+    }
+
+    return 0;
+}
+
+
+int RCPSModel2Glucose::addPriority(const VariableDb& vars, Glucose::Solver& solver)
+{
+    for (auto i : vars)
+    {
+        if (createdVars_.count(i.first))
+        {
+            solver.addPriority(createdVars_.at(i.first), 30);
+        }
     }
 
     return 0;

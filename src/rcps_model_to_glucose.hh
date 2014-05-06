@@ -28,6 +28,7 @@ public: // public functions
     VarMap& getVarMap() {return createdVars_;}
 
 private: // private function
+    int addPriority(const VariableDb& vars, Glucose::Solver& solver);
     int transformClauseDb2Solver(ClauseDb& clauseDb, Glucose::Solver& solver);
 };
 

@@ -28,6 +28,7 @@ public: // public functions
     const VarMap& getVarMap() {return createdVars_;}
 
 private: // private function
+    int addPriority(const VariableDb& vars, Minisat::Solver& solver);
     int transformClauseDb2Solver(ClauseDb& clauseDb, Minisat::Solver& solver);
 };
 

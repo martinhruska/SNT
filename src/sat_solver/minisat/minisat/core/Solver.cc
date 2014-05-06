@@ -138,12 +138,6 @@ Var Solver::newVar(lbool upol, bool dvar)
     assigns  .insert(v, l_Undef);
     vardata  .insert(v, mkVarData(CRef_Undef, 0));
     activity .insert(v, rnd_init_act ? drand(random_seed) * 0.00001 : 0);
-    /*
-    if (rcpsModel->getProcessVars().count(rcpsAdapter->getReverseVar().at(v)))
-    {
-        activity[v] += 30;
-    }
-    */
     seen     .insert(v, 0);
     polarity .insert(v, true);
     user_pol .insert(v, upol);
@@ -153,6 +147,17 @@ Var Solver::newVar(lbool upol, bool dvar)
     return v;
 }
 
+int Solver::addPriority(int v, int p)
+{
+    if (v >= nVars())
+    {
+        return -1;
+    }
+
+    activity[v] += p;
+
+    return 0;
+}
 
 // Note: at the moment, only unassigned variable will be released (this is to avoid duplicate
 // releases of the same variable).
