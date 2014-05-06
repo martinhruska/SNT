@@ -10,6 +10,7 @@
 \usepackage{tikz}
 \usepackage{url}
 \usepackage{comment}
+\usepackage[longend,ruled,vlined,commentsnumbered,linesnumbered,czech]{algorithm2e}
 \newcommand{\myuv}[1]{\quotedblbase #1\textquotedblleft}
 \newcommand{\rcps}[0]{Resource Constraint Project Scheduling}
 
@@ -76,18 +77,97 @@ knihovna pro mnoho instancí problému obsahuje.
 Příklad vstupních dat lze najít v~adresáří \emph{input}.
 TODO DECRIBE STRUCTURE OR DETELE THIS
 
-\subsection{SAT Solving v~RCPS}
-% define sat problem
-% what is sat solving
+\subsection{SAT Solvinig}
+Metody a nástroje SAT solvingu se zabývají řešením SAT problému (který je NP-úplný),
+který odpovídá na otázku, zdali je daná formule výrokové logiky splnitelná.
+V~našem případě uvažujeme formuli výrokové logiky v~\emph{konjunktnivní} normální formě (CNF).
+formule je definovaná přes množinu proměnných, které nabývají hodnoty z~množiny $\{true, false\}$
+a je složena z~následujících prvků:
+ \begin{itemize}
+ 	\item \emph{Literálu}, což jsou samotné proměnné nebo jejich negace
+ 	\item \emph{Klausulí}, což jsou disjunkce ($\vee$) literálů
+	\item Samotná výroková formule v~CNF je pak konjunkcí ($\wedge$) klausulí.
+ \end{itemize}.
+
+Ohodnocení formule je konkrétní zobrazení jejich proměnných na hodnoty $\{true, false\}$.
+Formule je \emph{splnitélná}, pokud existuje ohodnocení, při kterém je celá formule vyhodnocena
+jako $true$.
+Takové ohodnocení se potom nazývá modelem formule v~CNF.
+
+Programy řešící SAT problém se nazývají \emph{SAT Solvery}.
+V~poslední době proběhl v~oblastni SAT solverů výrazný pokrok a mnohé z~nich jsou již
+schopny  řešit SAT problémy obsahující velké formule.
+Porovnání možností a výkonu SAT solverů lze najít na \cite{www:sat}.
+
+Základním algoritmem použivaným v~SAT Solvingu (a dnešních SAT Solverech) je
+\emph{Davis–Putnam\-Logemann–Loveland (DPLL) algoritmus} \cite{dpll:1960, dpll:1962}.
+Algoritmus lze najít v~\ref{alg:dpll} a bude následovat jeho krátký popis.
+
+Funkce \emph{propagate} ohodnotí proměnné na základé aktuálního částečného ohodnocení tak, že
+provedená nová ohodnocení jsou důsledkem aktuálního stavu.
+Pokud při tomtu ohodnocení nevznikne konflikt, t.j. jedna klausule při učitém ohodnocení některé z~proměnných nabyde hodnoty $true$,
+zatímco jiná (konfliktní) klausule se při takovémto ohodnocení stane $false$, tak pokud jsou již ohodnoceny všechny proměnné, je vrácena
+hodnota $true$.
+Pokud konflikt nenastane, ale nejsou ohodnoceny všechny proměnné tak, je zvýšena úroveň zanoření při rozhodování (proměnná decision\_level)
+a je zavolána funkce \emph{decide}, která rozhodne, která další proměnná bude ohodnocena a na které se tedy bude další výpočet větvit.
+
+Pokud funkce propagate vrátí konfliktní klausuli, tak je zavolána funkce \emph{analyze}, která určí ke které úrovni zanoření při ohodnocování
+proměnných se bude navracet.
+Všechna ohodnocení provedena hloubějí než v~této úrovni jsou pak zrušena.
+V~moderních SAT Solverech funkce analyze také dokáže vytvořit \emph{naučenou} klausuli, která je důsledkem aktuální databáse klausulí a která
+má popisovat příčinu posledního konfliktu konfliktu.
+
+\begin{algorithm}
+\label{alg:dpll}
+    \KwIn{CNF formule}
+    \KwOut{$true$ pokud je formule splnitelná, jinak $false$}
+    decision\_level = 0\;
+    \While{$true$}
+    {
+        propagate()\;
+        \eIf{Není konflikt}
+        {
+            \eIf{Všechny proměnné přiřazeny}
+            {
+                \Return $true$\;
+            }
+            {
+                ++decesion\_level\;
+                decide()\;
+            }
+        }
+        {
+            analyze()\;
+            \eIf{nalezen konflikt na nejvyšší úrovni}
+            {
+                \Return $false$\;
+            }
+            {
+                backtrack()\;
+            }
+        }
+    }
+\caption{DPLL Algoritmus}
+\end{algorithm}
+
+V této práci byly použity SAT Solvery \emph{MiniSAT} \cite{www:minisat} a \emph{Glucose} \cite{www:glucose}, která
+používají další optimalizace k zlepšení efektivity výpočtu.
+MiniSAT byl vybrán na základě článku \cite{horbach:10}, kde byl úspěšně použit právě pro řešení RCPS problému.
+Glucose je solver založený na MiniSATu, ale implementující některé další optimalizace, a proto s ní budou provedeny
+experimenty, které si kladou za cíl zjistit, zdali přináší zlepšení pro výkonu při řešení RCPS problému.
 % how is it used in my model
 % used sat solvers
 
 \section{Konceptuální model}
-% picture with desing -- conceptual way
+% todo jak se řeší sat problémem
+V této sekci zabývající se konceptuálním bude popsána redukce RCPS problému na SAT problému.
+Uvedená redukce vychází z \cite{horbach:10}.
+\subsection{Redukce na SAT problém}
 % formalizovat prevod zadani rcps modelu na sat formuli
 
 
 \section{Architektura}
+% picture with desing -- conceptual way
 % describe classes, data structures
 % what is sat solver, translater, parser
 

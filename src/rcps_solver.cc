@@ -15,17 +15,31 @@ int main(int argc, char** argv)
 {
     const int requestParams = 2;
     const int infilePos = 1;
-    if (argc != requestParams)
+    const int timeoutPos = 2;
+    if (argc != requestParams && argc != requestParams+1)
     {
         std::cerr << "Not enough parameters \n";
         return EXIT_FAILURE;
     }
 
+    int timeout = -1;
+
+    if (argc == requestParams+1)
+    { // timeout parameter has been entered
+        char *pEnd;
+        timeout = strtol(argv[timeoutPos],&pEnd,10);
+        if (pEnd == argv[timeoutPos])
+        {
+            std::cerr << "Timeout has to be integer\n";
+            return EXIT_FAILURE;
+        }
+    }   
+
     // parse input file
     const char *inputFile = argv[infilePos];
     RCPSInstance instance;
     int res = Parser::parse(instance, inputFile);
-    std::cout << "parsed\n";
+    std::cerr << "parsed\n";
     if (res)
     {
         if (res == 2)
@@ -43,45 +57,16 @@ int main(int argc, char** argv)
     {
         std::cerr << "Cannot parser to precedence graph\n";
     }
-    std::cout << "parsed graph\n";
+    std::cerr << "parsed graph\n";
     rcpsFloydWarshall(precGraph);
-    std::cout << "warshall\n";
+    std::cerr << "warshall\n";
     storeGraphValuesToInstance(precGraph,instance);
-    std::cout << "graph stored\n";
+    std::cerr << "graph stored\n";
     //Parser::toString(instance);
     RCPSSATModel model;
     createSATmodelFromRCPS(model, instance);
-    std::cout << "model created\n";
+    std::cerr << "model created\n";
        
-    RCPSOptimizer::optimize(model, instance);
-    //printModel(model);
-    //Parser::toString(instance);
-    /*
-    Glucose::Solver solver;
-    RCPSModel2Glucose transformer;
-    transformer.transformModel2Solver(model, solver);
-    if (!solver.solve())
-    {
-        std::cerr << "Unable to solve the model\n";
-        return EXIT_SUCCESS;
-    }
-    auto revVar = transformer.getReverseVar();
-    auto dbs = model.getStartVars();
-    auto dbp = model.getProcessVars();
-    for (int i=0; i<solver.nVars(); ++i)
-    {
-        int v = revVar[i];
-        Variable vp;
-        if (dbs.count(v))
-        {
-            vp = dbs[v];
-            std::cout << "Activity " << vp.job << " Time " << vp.time << " is " << (solver.model[i] == l_True) << std::endl;
-        }
-        else if (dbp.count(v))
-        {
-            vp = dbp[v];
-        }
-    }
-    */
+    RCPSOptimizer::optimize(model, instance, timeout);
     return EXIT_SUCCESS;
 }

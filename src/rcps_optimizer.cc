@@ -9,20 +9,24 @@
 #endif
 
 #include <iostream>
+#include <time.h>
+
 
 using namespace RCPSSolver;
 //using namespace Glucose;
 //using namespace Minisat;
 
-int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance)
+int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance, int timeout)
 {
     int max = instance.getUpperBound();
     int lastMax = max+1;
     const int lb =instance.getLowerBound();
     bool solved = true;
+    time_t start = time(0);
 
-    while (solved && max >= lb)
+    while (solved || max >= lb)
     {
+        time_t startCycle = time(0);
         #ifdef MINISAT_OPT
             RCPSModel2Minisat transformer;
             Minisat::Solver solver(&model, &instance, &transformer);
@@ -30,7 +34,7 @@ int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance)
             RCPSModel2Glucose transformer;
             Glucose::Solver solver(&model, &instance, &transformer);
         #endif
-            
+           
         std::cout << "transforming\n";
         if (modelTimeConstraint(max, lastMax,
             model, instance))
@@ -41,36 +45,27 @@ int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance)
         //printModel(model);
         std::cout << "transformed\n";
         std::cout << "START SOLVING\n";
+        time_t startSolve = time(0);
         solved = solver.solve();
+        double diffSolve =  difftime(time(0), startSolve);
+        double diffCycle =  difftime(time(0), startCycle);
         //solver.printModel();
-        std::cout << "Max: " << max-1 << " [" << (solved==true) << "]" << std::endl;
+        std::cout << "Max: " << max-1 << " [" << (solved==true) << "]" 
+        << " " << diffSolve << " " << diffCycle << std::endl;
         lastMax = max;
         --max;
-        /*
-        auto revVar = transformer.getReverseVar();
-        auto dbs = model.getStartVars();
-        auto dbp = model.getProcessVars();
-        for (int i=0; i<solver.nVars(); ++i)
+
+        if (timeout>=0 && difftime(time(0), start) > timeout)
         {
-            int v = revVar[i];
-            Variable vp;
-            if (dbs.count(v))
-            {
-                vp = dbs[v];
-                std::cout << "Activity " << vp.job << " Time " << vp.time << " is " << (solver.model[i] == l_True) << std::endl;
-            }
-            else if (dbp.count(v))
-            {
-                vp = dbp[v];
-            }
+            std::cout << "Timeout\n";
+            break;
         }
-        */
     }
 
-    std::cout << "Optimization done" << std::endl;
+    std::cout << "Done " << difftime(time(0), start)  << std::endl;
 
     int res;
-    if (solved)
+    if (lastMax == instance.getLowerBound())
     { // reached lower bound
         std::cout << "Successufully optimized" << std::endl;
         res = max;
@@ -82,4 +77,3 @@ int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance)
 
     return res;
 }
-
