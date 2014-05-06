@@ -36,12 +36,12 @@ Následně budou zkoumány možnosti a způsoby využití SAT solving při řeš
 \begin{enumerate}
     \item $V=\{A_0, \ldots, A_{n+1}\}$ je množina aktivit, které mají být vykonány.
     Dle konvence je $A_0$ aktivita reprezentující začátek rozvrhu a $A_{n+1}$ aktivita reprezentující konec rozvrhu.
-    \item $p: V~\leftarrow \mathbb{N}$ je funkce udávající dobu trvání aktivit.
+    \item $p: V~\rightarrow \mathbb{N}$ je funkce udávající dobu trvání aktivit.
     \item $E \subseteq V\times V$ je precedenční relace.
     Pokud $(A_i, A_j) \in E$, tak aktivita $A_i$ musí být provedena před aktivitou $A_j$.
     \item $R=\{R_1,\ldots,R_q\}$ je množina zdrojů.
-    \item $B: R \leftarrow \mathbb{N}$ je funkce udávající kapacitu zdrojů.
-    \item $b: V~\times R \leftarrow \mathbb{N}$ je funkce udavájící množství určitého zdroje, které vyžaduje daná aktivita pro
+    \item $B: R \rightarrow \mathbb{N}$ je funkce udávající kapacitu zdrojů.
+    \item $b: V~\times R \rightarrow \mathbb{N}$ je funkce udavájící množství určitého zdroje, které vyžaduje daná aktivita pro
     svoje provádění.
 \end{enumerate}
 
@@ -52,7 +52,7 @@ Toto řešení můžeme nazývat rozvrhem.
  \forall (A_i,A_j) \in E: S_j - S_i \geq p(A_i)
 \end{equation}
 \begin{equation}
- \forall R_k \in R \forall t \geq 0: \sum_{A_i \in A_t} b(A_i, R_k) \leq B(k)
+ \forall R_k \in R\ \forall t \geq 0: \sum_{A_i \in A_t} b(A_i, R_k) \leq B(k)
 \end{equation}
 kde $A_t=\{A_i \in A\,|\, S_i \leq t \leq S_i+p(A_i)\}$.
 
@@ -63,6 +63,8 @@ V~dalším textu jsou uvažovány \emph{single-mode} \rcps\ úlohy.
 Single-mode znamená, že aktivity dané úlohy mají pouze jeden mód činnosti,
 narozdíl od tzv. \emph{multi-mode} úloh jejichž aktivity mají více módu činnosti
 a každý mód má odlišné požadavky na spotřebu zdrojů.
+
+TODO: earliest job and latest start job
 
 % solving methods of rcps
 \subsection{PSPLIB}
@@ -150,26 +152,106 @@ má popisovat příčinu posledního konfliktu konfliktu.
 \caption{DPLL Algoritmus}
 \end{algorithm}
 
-V této práci byly použity SAT Solvery \emph{MiniSAT} \cite{www:minisat} a \emph{Glucose} \cite{www:glucose}, která
-používají další optimalizace k zlepšení efektivity výpočtu.
+V~této práci byly použity SAT Solvery \emph{MiniSAT} \cite{www:minisat} a \emph{Glucose} \cite{www:glucose}, která
+používají další optimalizace k~zlepšení efektivity výpočtu.
 MiniSAT byl vybrán na základě článku \cite{horbach:10}, kde byl úspěšně použit právě pro řešení RCPS problému.
-Glucose je solver založený na MiniSATu, ale implementující některé další optimalizace, a proto s ní budou provedeny
+Glucose je solver založený na MiniSATu, ale implementující některé další optimalizace, a proto s~ní budou provedeny
 experimenty, které si kladou za cíl zjistit, zdali přináší zlepšení pro výkonu při řešení RCPS problému.
 % how is it used in my model
 % used sat solvers
 
 \section{Konceptuální model}
-% todo jak se řeší sat problémem
-V této sekci zabývající se konceptuálním bude popsána redukce RCPS problému na SAT problému.
-Uvedená redukce vychází z \cite{horbach:10}.
-\subsection{Redukce na SAT problém}
-% formalizovat prevod zadani rcps modelu na sat formuli
+RCPS problém lze řešit jeho redukcí na SAT problém a následním řešením pomocí SAT solveru.
+V~této kapitole bude právě tato redukce popsána a to dle přístupu z~\cite{horbach:10}.
 
+SAT formule budou definovány nad následujícími proměnnými:
+\begin{itemize}
+    \item Startovací proměnné $s_{it}$, kde $i\in V$ a $t\in{es_i,\ldots,ls_i}$, pro které platí: \newline 
+    $s_{it}=
+        \left\{
+        \begin{array}{ll}
+             true & \mbox{pokud} \emph{ aktivita }j \emph{ začíná v~čase }t \\
+             false & \mbox{jinak}\\
+        \end{array}
+        \right.
+        $
+    \item Procesní proměnné $u_{it}$, kde $i \in V$ a $t \in {es_i,\ldots, lf_i}$, pro které platí: \newline
+    $u_{it}=
+        \left\{
+        \begin{array}{ll}
+             true & \mbox{pokud} \emph{ aktivita }j \emph{ je ve zpracování  v~čase }t \\
+             false & \mbox{jinak}\\
+        \end{array}
+        \right.
+        $
+\end{itemize}
+
+Nyní přistupme k~samotné redukci RCPS problému do CNF formulí.
+Správná kombinace startovacích a procesních proměnných je zaručena pomocí tzv. \emph{klausulí konzistence}:
+\begin{equation}
+\label{eq:1}
+   \neg s_{it} \vee u_{il},\emph{ kde } i\in\{es_i,\ldots,ls_i\}, l\in\{t,\ldots,t+d_i-1\}  
+\end{equation}
+
+Dodržení omezení daných precedenční relací zajišťují tzv. \emph{precedenční klausule}:
+\begin{equation}
+\label{eq:2}
+   \neg s_{it} \bigvee_{l\in\{es_j,\ldots,t-d_j\}} s_{jl},\emph{ kde } (j,i) \in E, t \in\{es_i,\ldots,ls_i\}   
+\end{equation}
+Oproti přísputu z~\cite{horbach:10} je zde použito $l\in\{es_j,\ldots,t-d_j\}$ namísto $l\in\{es_j,\ldots,es_i-d_j\}$ tak,
+aby klausule skutečně vyjadřovala, že začne-li aktivita $i$ v~čase $t$, tak aktivita, která ji má dle precedenční
+relace předcházet, začala dříve alespoň o~svého trvání.
+
+Dalším typem klasulí jsou \emph{klausule startovací}, které zaručují, že každá aktivita někdy začne:
+\begin{equation}
+\label{eq:3}
+   \bigvee_{t\in\{es_i,\ldots,ls_{i}\}} s_{it},\emph{ kde } i \in
+V~\end{equation}
+
+Dosud uvedené klausule nezaručují, že nebude v~jeden okamžik naplánováno více aktivit, které ovšem můžou mít rozdílné
+větší nároky na některý zdroj než je jeho dostupné množství.
+Takovotou množinu aktivit $C$, pro kterou u~některého zdroje $k$ platí $\sum_{i\in C} r_{ik} > R_k$, nazveme \emph{pokrytím}.
+Minimální pokrytí je takové, že bez některé aktivity $i\in C$, přestává být množina $C$ prokrytím.
+Nepřečerpání některého ze zdrojů lze zajistit porstřednictvím \emph{klausulí pokrytí}:
+\begin{equation}
+\label{eq:4}
+   \bigvee_{i\in C} \neg u_{it},\emph{ kde } t\in{0,\ldots,T-1}, C \emph{ je minimální pokrytí}   
+\end{equation}
+
+Každá množina klausulí z~\ref{eq:1},\ref{eq:2},\ref{eq:3} nabývá polynomiální velikosti a je tedy řešitelná pomocí moderních SAT solverů,
+a proto je možné je vygenerovat na základě instance RCPS problému před spuštěním SAT solveru.
+Počet klausulí \ref{eq:4} ovšem roste exponencíálně, a tudíž by jejich kompletní vygenerování bylo možné jen pro instance
+s~malým počtem aktivit,
+Proto jsou tyto klasule v~dokumentované implementaci přídávány do databáse SAT solveru dynamicky.
+Bližší informace stran implementace samotné jsou v~sekci \ref{sec:arch}.
+
+Aby bylo možné provádět samotnou optimalizaci, je třeba přidat klausule omezující maximální makespan.
+Nazvěme tyto klausule \emph{časovými}:
+\begin{equation}
+\label{eq:5}
+   \bigvee_{i\in C} \neg s_{n+1,t},\emph{ kde } t\in{l+1,\ldots,ls_{n+1}}, \emph{ l je maximální makespan}   
+\end{equation}
+
+Stejně jako v~\cite{horbach:10} byly přidány následující klausule, které přináší zrychlení výpočtu SAT solveru:
+\begin{equation}
+\label{eq:6}
+   \neg u_{it} \vee u_{i,t+1} \vee u_{i,t-d_i+1},\emph{ kde } i\in V, s\in\{ef_i,\ldots,lf_i-1\}  
+\end{equation}
+Klausule udávají, že doba $t$ je doba konce aktivity $i$ a SAT solver může odvodit, že aktivita $i$ začíná v~době
+$t-d_i+1$.
+
+Tím je redukce RCPS problému na SAT problém kompletní včetně zakódování optimalizačního problému a přídání
+klausulí zrychlujících výpočet SAT Solveru.
 
 \section{Architektura}
+\label{sec:arch}
 % picture with desing -- conceptual way
 % describe classes, data structures
 % what is sat solver, translater, parser
+
+\subsection{Implementační optimalizace}
+dynamická databáze
+priority pro procesní proměnné
 
 \section{Experimenty}
 % this is clear
