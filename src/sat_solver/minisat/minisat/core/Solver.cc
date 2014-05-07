@@ -313,7 +313,7 @@ Lit Solver::pickBranchLit()
 |        rest of literals. There may be others from the same level though.
 |  
 |________________________________________________________________________________________________@*/
-void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
+lbool Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
 {
 
     int pathC = 0;
@@ -325,6 +325,10 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
     int index   = trail.size() - 1;
 
     do{
+        if (confl == CRef_Undef)
+        {
+            return l_False;
+        }
         assert(confl != CRef_Undef); // (otherwise should be UIP)
         Clause& c = ca[confl];
 
@@ -402,6 +406,7 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
     }
 
     for (int j = 0; j < analyze_toclear.size(); j++) seen[var(analyze_toclear[j])] = 0;    // ('seen[]' is now cleared)
+    return l_True;
 }
 
 
@@ -579,7 +584,7 @@ CRef Solver::findCover(Lit p)
                     Lit litAssign = mkLit(gvar, true);
                     clausesVec[res].push(litAssign);
                     // add cover clause to the database
-                    CRef cr = ca.alloc(clausesVec[res], false); // TODO am I adding really minimal cover clause?
+                    CRef cr = ca.alloc(clausesVec[res], false);
                     clauses.push(cr);
                     attachClause(cr);
                     //addClause(clausesVec[res]);
@@ -916,7 +921,10 @@ lbool Solver::search(int nof_conflicts)
             }
 
             learnt_clause.clear();
-            analyze(confl, learnt_clause, backtrack_level);
+            if (analyze(confl, learnt_clause, backtrack_level) == l_False)
+            {
+                return l_False;
+            }
             cancelUntil(backtrack_level);
 
             if (learnt_clause.size() == 1){

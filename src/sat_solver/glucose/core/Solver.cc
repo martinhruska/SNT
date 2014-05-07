@@ -527,7 +527,7 @@ Lit Solver::pickBranchLit()
 |        rest of literals. There may be others from the same level though.
 |  
 |________________________________________________________________________________________________@*/
-void Solver::analyze(CRef confl, vec<Lit>& out_learnt,vec<Lit>&selectors, int& out_btlevel,unsigned int &lbd,unsigned int &szWithoutSelectors)
+lbool Solver::analyze(CRef confl, vec<Lit>& out_learnt,vec<Lit>&selectors, int& out_btlevel,unsigned int &lbd,unsigned int &szWithoutSelectors)
 {
     int pathC = 0;
     Lit p     = lit_Undef;
@@ -538,6 +538,8 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt,vec<Lit>&selectors, int& o
     int index   = trail.size() - 1;
 
     do{
+        if (confl == CRef_Undef)
+          return l_False;
         assert(confl != CRef_Undef); // (otherwise should be UIP)
         Clause& c = ca[confl];
 
@@ -697,7 +699,8 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt,vec<Lit>&selectors, int& o
 
 
   for (int j = 0; j < analyze_toclear.size(); j++) seen[var(analyze_toclear[j])] = 0;    // ('seen[]' is now cleared)
-  for(int j = 0 ; j<selectors.size() ; j++) seen[var(selectors[j])] = 0;  
+  for(int j = 0 ; j<selectors.size() ; j++) seen[var(selectors[j])] = 0;
+  return l_True;
 }
 
 
@@ -856,7 +859,7 @@ CRef Solver::findCover(Lit p)
 
                     clausesVec[res].push(litAssign);
                     // add cover clause to the database
-                    CRef cr = ca.alloc(clausesVec[res], false); // TODO am I adding really minimal cover clause?
+                    CRef cr = ca.alloc(clausesVec[res], false);
                     clauses.push(cr);
                     attachClause(cr);
                     //assigns[var(litAssign)] = l_False;
@@ -1271,7 +1274,10 @@ lbool Solver::search(int nof_conflicts)
 
             learnt_clause.clear();
 	    selectors.clear();
-            analyze(confl, learnt_clause, selectors,backtrack_level,nblevels,szWoutSelectors);
+            if (analyze(confl, learnt_clause, selectors,backtrack_level,nblevels,szWoutSelectors) == l_False)
+            {
+              return l_False;
+            }
 
 	    lbdQueue.push(nblevels);
 	    sumLBD += nblevels;
@@ -1469,7 +1475,6 @@ printf("c ==================================[ Search Statistics (every %6d confl
         for (int i = 0; i < nVars(); i++) model[i] = value(i);
     }else if (status == l_False && conflict.size() == 0)
         ok = false;
-
 
 
     cancelUntil(0);
