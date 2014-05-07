@@ -41,11 +41,10 @@ template<class Solver, class Transformer>
 int RCPSOptimizer::optimize_(RCPSSATModel& model, const RCPSInstance& instance,
   int timeout)
 {
-    const int lb = instance.getLowerBound();
-    const int up = instance.getUpperBound();
-    int max = lb; // instance.getUpperBound();
-    int lastMax = max-1;
-    bool solved = false;//true;
+    int max = instance.getDueDate(); //instance.getLowerBound()-1;
+    int lastMax = max+1;
+    const int ub =instance.getUpperBound();
+    bool solved = false;
     clock_t start = clock();
 
     while (!solved && max <= ub)
@@ -55,9 +54,11 @@ int RCPSOptimizer::optimize_(RCPSSATModel& model, const RCPSInstance& instance,
         Solver solver(&model, &instance, &transformer);
            
         std::cerr << "transforming\n";
-        if (modelTimeConstraint(lastMax, max,
-            model, instance))
+        int res;
+        if ((res = modelTimeConstraint(max, ub+1,
+            model, instance)))
         {
+            std::cerr << "Cannot model time constraints " << res << '\n';
             break;
         }
         transformer.transformModel2Solver(model, solver);
@@ -84,15 +85,14 @@ int RCPSOptimizer::optimize_(RCPSSATModel& model, const RCPSInstance& instance,
     std::cout << "Done " << (clock()-start)/CLOCKS_PER_SEC << std::endl;
 
     int res;
-    //if (lastMax == instance.getLowerBound())
-    if (solved)
+    if (solved || max > instance.getUpperBound())
     { // reached lower bound
         std::cout << "Successufully optimized" << std::endl;
         res = max;
     }
     else
     {
-        res = lastMax;
+        res = max; //lastMax;
     }
 
     return res;

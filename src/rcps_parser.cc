@@ -73,6 +73,7 @@ int Parser::parse(RCPSInstance& instance, const char* source)
                     state = sink;
                 }
                 instance.upperBound_ = temp;
+                instance.horizont_ = temp;
                 state = 5;
                 break;
 

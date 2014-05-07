@@ -120,6 +120,7 @@ int RCPSSolver::modelTimeConstraint(const int newMaxTime, const int lastMaxTime,
     {
         return 1;
     }
+    model.clausesTimeCons_.clear();
     const int lastJob = instance.getJobsNumber()-1;
     for (int time = newMaxTime; time < lastMaxTime; ++time)
     {

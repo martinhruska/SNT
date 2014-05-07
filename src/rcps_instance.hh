@@ -35,6 +35,7 @@ private: // private data members
     int dueDate_;
     int tardCost_;
     int mpmTime_;
+    int horizont_;
 
 public: // public member functions
     int getDemand(JobType act, ResourceType res) const
@@ -84,6 +85,7 @@ public: // public member functions
 
     int getUpperBound() const {return upperBound_;}
     int getDueDate() const {return dueDate_;}
+    int getHorizont() const {return horizont_;}
     int getLowerBound() const {return lowerBound_;}
     int getDuration(int pos) const
     {
