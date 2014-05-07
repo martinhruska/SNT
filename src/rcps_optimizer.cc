@@ -52,19 +52,6 @@ int RCPSOptimizer::optimize_(RCPSSATModel& model, const RCPSInstance& instance,
         clock_t startCycle = clock();
         Transformer transformer;
         Solver solver(&model, &instance, &transformer);
-        //#ifdef MINISAT_OPT
-        /*
-        if (solver)
-        {
-            RCPSModel2Minisat transformer;
-            Minisat::Solver solver(&model, &instance, &transformer);
-        }
-        else
-        {
-            RCPSModel2Glucose transformer;
-            Glucose::Solver solver(&model, &instance, &transformer);
-        }
-        */
            
         std::cerr << "transforming\n";
         if (modelTimeConstraint(max, lastMax,
