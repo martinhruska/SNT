@@ -27,6 +27,7 @@
 % speek about np hardness of problem
 
 \section{Analýza \rcps}
+\label{sec:analysis}
 V~této sekci bude napřed formálně definován \rcps\ problém a optimalizační problém související s~jeho řešení.
 Dále bude popsána knihovna PSPLIB a její formát popisu instancí RCPS problému.
 Následně budou zkoumány možnosti a způsoby využití SAT solving při řešení RCPS problému.
@@ -161,6 +162,7 @@ experimenty, které si kladou za cíl zjistit, zdali přináší zlepšení pro 
 % used sat solvers
 
 \section{Konceptuální model}
+\label{sec:concept}
 RCPS problém lze řešit jeho redukcí na SAT problém a následním řešením pomocí SAT solveru.
 V~této kapitole bude právě tato redukce popsána a to dle přístupu z~\cite{horbach:10}.
 
@@ -245,15 +247,15 @@ klausulí zrychlujících výpočet SAT Solveru.
 
 \section{Architektura}
 \label{sec:arch}
-V~této sekci bude popsána architektura implementovaného programu, implementační optimalizace a budou zmíněny použité SAT Solvery.
+V této sekci bude popsána architektura implementovaného programu, implementační optimalizace a budou zmíněny použité SAT Solvery.
 
 Logický návrh architektury programu je na obrázku \ref{fig:arch}.
-Program nejprve načte vstup, kterým je soubor z~knihovny PSPLIB, poté ho
+Program nejprve načte vstup, kterým je soubor z knihovny PSPLIB, poté ho
 převede do interní reprezentace (na Obrázku jako \emph{Instance RCPS problému}).
-V~této interní reprezentaci se instance RCPS problému předá optimilazátoru,
-který pomocí příslušných modulů vypočte kritckou cestu a s~ní související informace a doplní je do reprezentace RCPS problému.
-Následně je vytvořena interní reprezentace SAT problému (SAT formule v~CNF), která je následně
-převedena do reprezentace příslušného SAT Solveru, který je v~nazávěr spuštěn.
+V této interní reprezentaci se instance RCPS problému předá optimilazátoru,
+který pomocí příslušných modulů vypočte kritckou cestu a s ní související informace a doplní je do reprezentace RCPS problému.
+Následně je vytvořena interní reprezentace SAT problému (SAT formule v CNF), která je následně
+převedena do reprezentace příslušného SAT Solveru, který je v nazávěr spuštěn.
 Toto optimalizátor postupně provádí pro jednotlivé makespan, dokuď není nalezen ten nejnížší možný.
 \begin{figure}
 \begin{center}
@@ -263,23 +265,152 @@ Toto optimalizátor postupně provádí pro jednotlivé makespan, dokuď není n
 \end{center}
 \end{figure}
 
-Následuje seznam tříd implementující jednotlivé bloky programu:
+Následuje seznam tříd implementující jednotlivé bloky z logického návrhu programu:
 \begin{itemize}
- \item
+ \item Parser
+    \begin{itemize}
+        \item Třída \emph{RCPSParser} obsahuje metody pro načtení souboru se vstupem z PSPLIB a převede ho do interní
+        reprezentace RCPS problému (třída \emph{RCPSInstance}).
+    \end{itemize}
+ \item Instance RCPS problému
+    \begin{itemize}
+        \item Třída \emph{RCPSInstance} v sobě uchováva informace uvedené v definici RCPS problému v sekci \ref{sec:analysis}.
+        Uchovává také informace o nejdřívějších a nejpozdějších možných časech začátků a konců jednotlivých aktivit.
+    \end{itemize}
+ \item Výpočet kritické cesty
+    \begin{itemize}
+        \item Třída \emph{RCPSGraph} reprezentuje graf, do které ho je převeden RCPS problém, aby mohla být spočítáná kritická cesta a s ní
+        související informace jako možné časy začátků a konců aktivit.
+        Obsahuje také metody pro výpočet této kritické cesty pomocí Floyd-Warshallova algoritmu.
+    \end{itemize}
+ \item Interní SAT model
+    \begin{itemize}
+        \item Třída \emph{RCPSSATModel} reprezentuje interně SAT problém, na který byl redukován RCPS problém.
+        Obsahuje také metody pro tuto redukci.
+    \end{itemize}
+ \item Převod do reprezentace SAT solveru
+    \begin{itemize}
+        \item Třída \emph{RCPSModel2Glucose} obsahuje metody převádějící interní SAT model v třídě \emph{RCPSSATModel}
+        do interní reprezentace SAT solveru \emph{Glucose}.
+        \item Třída \emph{RCPSModel2Minisat} obsahuje metody převádějící interní SAT model v třídě \emph{RCPSSATModel}
+        do interní reprezentace SAT solveru \emph{MiniSAT}.
+    \end{itemize}
+ \item Byly použity následující dva SAT solvery:
+    \begin{itemize}
+        \item \emph{MiniSAT} \cite{www:minisat} je SAT solver použíty v \cite{horbach:10}.
+        Dříve patřil mezi nejlepší SAT solvery (oceněný v soutěži \cite{www:sat}), dnes již neimplemetuje
+        všechny aktuální heuristiky a optimalizace používaný v SAT Solvingu.
+        \item \emph{Glucose} \cite{www:glucose} je nádstavnou nad MiniSAT, která implementuje
+        pokročilejší optimalizace a je v posledních letech oceňována v soutěži SAT Competition \cite{www:sat}.
+        Zachovává rozhraní MiniSAT, tudíž ji bylo možné použít bez nutnosti výraznějších změn postupů použitých při
+        modifikaci MiniSAT.
+    \end{itemize}
+ \item Optimalizátor
+    \begin{itemize}
+        \item Třída \emph{RCPSOptimizer} realizuje vlastní výpočet a optimalizaci pomocí ostatních modulů.
+    \end{itemize}
 \end{itemize}
-% picture with desing -- conceptual way
-% describe classes, data structures
-% what is sat solver, translater, parser
 
-\subsection{Implementační optimalizace}
-dynamická databáze
-priority pro procesní proměnné
+\subsection{Modifikace SAT solveru}
+Jak bylo řečeno v sekci \ref{sec:concept}, množství klausulí pokrytí \ref{eq:4} dosahuje exponenciální složitosti,
+proto není možné tyto klausule vygenerovat před spuštěním samotného SAT solveru.
+Je nutné je generovat dle potřeby během výpočtu, což lze udělat tak \cite{horbach:10}, že je spuštěn SAT solver bez
+těchto klausulí a na základě vypočteného ohodnocení proměnných je ověřováno, že v žádném čase
+nedošlo k přečerpání žádného zdroje.
+Pokud by k tomuto došlo, je přidána příslušná klausule pokrytí, která tomuto zabrání a SAT solver je spuštěn
+znovu.
+Nevýhoda tohoto přístupu je taková, že SAT solver vždy ztrácí celý kontext výpočtu a musí začínat od začátku, a proto
+je tento přístup vhodný jen u malých problému, a tedy nebyl v této práci implementován.
+
+Implementován byl přístup, který modifikuje fukci \emph{propagate} v SAT solveru.
+Vždy když je pravdivě ohodnocen nějaký literál obsahující procesní proměnnou $u_{it}$, tak je zkontrolováno,
+zdali tímto ohodnocením není v čase $t$ překročeno množství některého ze zdrojů použitých aktivitou $i$.
+Pokud ano, je vygenerována příslušná klausle pokrytí, která je přidána do databáse klausulí a vrácena jako konflitkní klausule.
+Pokud k takovému porušení nedocházi, jsou vygenerovány klausule pokrytí zabraňující tomu, aby byla 
+(dosud neohodnocená) procesní proměnná $u_{jt}$ ohodnocena jako $true$,
+pokud by činnost aktivity $j$ v čase $t$ vedla k přečerpání některého ze zdrojů.
+
+Přidání nové klausule za běhu nebylo možné provést přes funkci \emph{addClause} z rozhraní SAT solverů, ale použitím
+interní funkce \emph{attachClause} a přidáním nové klausule na zásobník klauslí v proměnné \emph{clauses}.
+
+Další provednou optimalizací je upřednostnění výběru procesních proměnných ve funkci \emph{decide} před výběrem
+startovacích proměnných.
+Tato optimalizace je také navržena v \cite{horbach:10} a empirickými experimenty s programem RCPSSolver
+byl ověřeno, že skutečně zrychluje výpočet.
+
+\subsection{Hledání optimálního řešení}
+Původně bylo hledání optimálního řešení implementováno tak, že se před
+zahájením samotné optimalizace vypočetla kritická cesta a s ní související informace.
+Poté byl zvolen makespan dle horního odhadu uvedeného v popisu instance z PSPLIB
+a ten byl postupně snižován dokud nebylo dosaženo spodní hranice, která
+byla dána kritickou cestou.
+Poslední makespan, u kterého bylo možné najít řešení RCPS problému byl pak prohlášen
+za optimální řešení.
+Tento přístup se ovšem ukázal jako velmi neefektivní, a proto byl
+implementován jiný, kde se prohledává od spodní hranice dané kritickou cestou,
+makespan se zvyšuje o jedna a jako horní hranice je brána hodnota o jedna
+vyšší než aktuální makespan.
+Pro tuto horní hranici jsou spočteny nejdřívější a nejpozdější možné začátky
+jednotlivých aktivit a teprve poté je RCPS problém zakódován do SAT problému.
+Tento postup se ukázal jako efektivnější nejen v hledání optimálního řešení, ale i v
+rozhodování jedné instance SAT problému, protože obsahují méně proměnných. 
+
+\subsection{Implementační problémy}
+SAT solvery při řešení větších instancí končily chybou \texttt{segmentation fault}.
+Příčinu této chyby se nepodařilo zjistit a není zřejmé, zdali se jedná o
+chybu zanešenou implementací dynamického přidávání klausulí a nebo o chybu
+způsobenou velikostí řešeného problému.
+Proto v případech, kdy by mělo k chybě \texttt{segmentation fault} dojít,
+je daná instance prohlášena za nesplnitelnou a je zvětšen makespan.
+Touto cestou nelze najít opravdu optimální řešení, protože přávě kolem
+hodnoty optimálního makespan dochází k nárustu složitosti výpočtu a tedy
+i zmíněné chybě, ale lze dostat alespoň suboptimální řešení udavající
+nejnižší makespan, pro který jde úloha vyřešit.
 
 \section{Experimenty}
 % this is clear
 
 \section{Závěr}
 % make this beatiful!
+
+\newpage
+\appendix
+\section{Instalace}
+\label{app:install}
+K~projektu je přiložen soubor \emph{Makefile}, tudíž lze zdrojové kódy zkompilovat pomocí příkazu \texttt{make}.
+Pro úspěšnou kompilaci je nutné mít nainstalovaný překladač GCC verze 4.8.
+Před spuštění je třeba dokončit konfiguraci prostředí skriptem \texttt{configure.sh},
+který přidá do systemových proměnných cestu ke knihovnám MiniSAT.
+Výstupem kompilace je spustitelný binární soubor \texttt{rcps\_solver} v adresáři \texttt{bin}.
+\section{Uživatelský manuál}
+\label{app:help}
+RCPSSolver lze spouštět z příkazového řádku následujícím způsobem:
+\\
+\\
+  rcps\_solver soubor [solver] [timeout]
+  \begin{itemize}
+    \item \texttt{soubor} $ldost$ Cesta k~vstupnímu souboru s~instancí problému z PSPLIB
+    \end{itemize}
+    \item \texttt{solver} $ldost$ Volba SAT solveru.  
+    \begin{itemize}
+        \item m $\ldots$ MiniSAT (default).
+        \item g $\ldots$ Glucose.
+    \end{itemize}
+    \item \texttt{timeout} $\ldots$ Doba pro řešení optimalizačního problému.
+    Neovlivní činnost SAT solveru, takže bude vždy před ukončením programu dořešena poslední SAT úloha.
+    \item Pokud jsou oba použity nepovinné parametry \texttt{solver} i \texttt{timeout}, je nutné dodržet jejich pořadí.
+
+\section{Výstup}
+\label{app:output}
+RCPSSolver průběžně informuje o svojí činnosti na standardní chybový výstup.
+Na standardní výstup pak vypisuje následující informace:
+\begin{itemize}
+    \item \texttt{Makespan: $X$ [$Y$] $U$ $V$} $\ldots$ $X$ je aktuální makespan, $Y$ udává, zdali je úloha řešitelná v daném makespan,
+    $U$ je doba řešení SAT problému a $V$ celková doba řešení RCPS problému pro daný makespan, oba údaje jsou v sekundách.
+    \item \texttt{Done X} $\ldots$ X je celková doba výpočtu optimalizace RCPS problému v sekundách.
+    \item \texttt{Optimal: X} $\ldots$ X je optimální řešení RCPS problému nalezené RCPSolverem.
+\end{itemize}
+Další výstupy pak mohou být informace, které vypisuje SAT solver.
 
 \newpage
 \bibliography{literatura}
