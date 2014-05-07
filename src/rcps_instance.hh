@@ -83,6 +83,7 @@ public: // public member functions
 
 
     int getUpperBound() const {return upperBound_;}
+    int getDueDate() const {return dueDate_;}
     int getLowerBound() const {return lowerBound_;}
     int getDuration(int pos) const
     {
