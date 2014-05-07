@@ -4,7 +4,7 @@ initial value random generator: 1828227495
 ************************************************************************
 projects                      :  1
 jobs (incl. supersource/sink ):  62
-horizon                       :  321
+horizon                       :  385
 RESOURCES
   - renewable                 :  4   R
   - nonrenewable              :  0   N

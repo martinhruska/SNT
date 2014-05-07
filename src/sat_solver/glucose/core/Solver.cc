@@ -538,7 +538,7 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt,vec<Lit>&selectors, int& o
     int index   = trail.size() - 1;
 
     do{
-        //assert(confl != CRef_Undef); // (otherwise should be UIP)
+        assert(confl != CRef_Undef); // (otherwise should be UIP)
         Clause& c = ca[confl];
 
 	// Special case for binary clauses
@@ -1018,7 +1018,7 @@ CRef Solver::propagate()
             Lit      false_lit = ~p;
             if (c[0] == false_lit)
                 c[0] = c[1], c[1] = false_lit;
-            //assert(c[1] == false_lit);
+            assert(c[1] == false_lit);
             i++;
 
             // If 0th watch is true, then clause is already satisfied.
