@@ -65,13 +65,23 @@ Single-mode znamená, že aktivity dané úlohy mají pouze jeden mód činnosti
 narozdíl od tzv. \emph{multi-mode} úloh jejichž aktivity mají více módu činnosti
 a každý mód má odlišné požadavky na spotřebu zdrojů.
 
-TODO: earliest job and latest start job
+Pro instanci RCPS problému také uvažujeme u~jejích aktivit časy nejdřívějšího a nejpozdějšího možného začátku (a
+také konce) činnosti dané aktivity.
+Dále se pro instanci zjišťuje doba tvrání \emph{kritické} cesty váženým grafem vytvořeným tak, že uzly odpovídají jednotlivým
+aktivitám a hrany jsou ohodnoceny dobou jejich trvání a jsou mezi uzly, jejichž aktivity jsou navzájem v~precedenční
+relaci.
+Kritická cesta je nejdelší cesta mezi uzly představujícími aktivitu $0$ a aktivitu $n+1$ a je vypočítána
+pomocí Floyd-warshallova algoritmu.
+Z~tohoto výpočtu dostáváme také údaje o~nejdelších cestách mezi jednotlivými uzly, což lze následně použít
+při výpočtu doby nejdřívějšího a nejpozdějšího začátku.
+Kritická cesta pak představuje dobu, za kterou by šla úloha splnit nejdříve, pokud by neexistovalo omezení dané
+množství zdrojů, ale pouze omezení dané precendenční relací.
+Kritická cesta bude v~následujícím textu uvažována jako spodní hranice řešení, tedy hranice u~níž víme, že nelze
+dosáhnout nižšího makespan, než je její hodnota.
+Opakem je poté horní hranice řešení, která udává maximální dobu, kterou může makespan nabývat a jejíž volba
+byla během implementace různá, více v~sekci \ref{sec:arch}.
 
-% solving methods of rcps
 \subsection{PSPLIB}
-% what is it and how should I use it
-%Dokumentovaný nástroj očekává jako vstup instanci RCSP problému zadanou ve formátu používaném knihovnou \emph{PSPLIB}, jež
-%ude v~této sekci stejně jako formát vstupu stručně popsána.
 PSPLIB je knihovna združíjící sady instancí \rcps\ problému v~jeho různých variantách a jejich optimální a heuristická řešení \cite{psplib}.
 Knihovna používá ke generování instancí problému vlastní nástroj \emph{ProGen}.
 Ve shodě se zadáním projektu byly použita data knihovny PSPLIB jako vstupy dokumentováného nástroje.
