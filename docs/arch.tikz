@@ -1,0 +1,37 @@
+\begin{tikzpicture}[
+  node distance = 4cm,
+  block_main/.style={rectangle, text centered, rounded corners, thick, fill=blue!50,
+    minimum height = 5em, minimum width = 5em},
+  block_parse/.style={rectangle, text centered, rounded corners, thick, fill=green!50,
+    minimum height = 5em, minimum width = 5em, text width = 6em},
+  block_solver/.style={rectangle, text centered, rounded corners, thick, fill=red!50,
+    minimum height = 5em, minimum width = 5em, text width = 6em},
+  block/.style={rectangle, text centered, rounded corners, thick, fill=orange!50,
+    minimum height = 5em, minimum width = 5em, text width = 6em},
+  line/.style={draw, -}
+  ]
+
+\node [block_main] (opt) {Optimalizátor};
+\node [block, right of=opt] (instance) {Instance RCPS problému};
+\node [block, above of=parse, right of=opt] (cp) {Výpočet kritické cesty};
+\node [block, left of=cp] (sat) {Interní SAT model};
+\node [block, left of=opt] (transformer) {Převod do reprezentace SAT solveru};
+\node [block_solver, left of=opt, above of=opt] (satsolver) {SAT Solver};
+\node [block_parse, below of=opt] (main) {main()};
+\node [block_parse, right of=main] (parser) {Parser vstupu z PSPLIB};
+
+\path [line] (opt) -- (instance);
+\path [line] (opt) -- (cp);
+\path [line] (opt) -- (sat);
+\path [line] (opt) -- (transformer);
+\path [line] (opt) -- (satsolver);
+\path [line] (opt) -- (main);
+
+\path [line] (sat) -- (satsolver);
+\path [line] (transformer) -- (satsolver);
+\path [line] (instance) -- (satsolver);
+\path [line] (instance) -- (cp);
+
+\path [line] (main) -- (parser);
+\path [line] (parser) -- (instance);
+\end{tikzpicture}

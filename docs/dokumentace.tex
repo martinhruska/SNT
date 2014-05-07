@@ -245,6 +245,28 @@ klausulí zrychlujících výpočet SAT Solveru.
 
 \section{Architektura}
 \label{sec:arch}
+V~této sekci bude popsána architektura implementovaného programu, implementační optimalizace a budou zmíněny použité SAT Solvery.
+
+Logický návrh architektury programu je na obrázku \ref{fig:arch}.
+Program nejprve načte vstup, kterým je soubor z~knihovny PSPLIB, poté ho
+převede do interní reprezentace (na Obrázku jako \emph{Instance RCPS problému}).
+V~této interní reprezentaci se instance RCPS problému předá optimilazátoru,
+který pomocí příslušných modulů vypočte kritckou cestu a s~ní související informace a doplní je do reprezentace RCPS problému.
+Následně je vytvořena interní reprezentace SAT problému (SAT formule v~CNF), která je následně
+převedena do reprezentace příslušného SAT Solveru, který je v~nazávěr spuštěn.
+Toto optimalizátor postupně provádí pro jednotlivé makespan, dokuď není nalezen ten nejnížší možný.
+\begin{figure}
+\begin{center}
+    \input{arch.tikz}
+    \caption{Koncptuální návrh programu}
+    \label{fig:arch}
+\end{center}
+\end{figure}
+
+Následuje seznam tříd implementující jednotlivé bloky programu:
+\begin{itemize}
+ \item
+\end{itemize}
 % picture with desing -- conceptual way
 % describe classes, data structures
 % what is sat solver, translater, parser
