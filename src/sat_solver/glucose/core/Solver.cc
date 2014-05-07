@@ -599,7 +599,6 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt,vec<Lit>&selectors, int& o
         confl = reason(var(p));
         seen[var(p)] = 0;
         pathC--;
-
     }while (pathC > 0);
     out_learnt[0] = ~p;
 
@@ -1018,7 +1017,7 @@ CRef Solver::propagate()
             Lit      false_lit = ~p;
             if (c[0] == false_lit)
                 c[0] = c[1], c[1] = false_lit;
-            assert(c[1] == false_lit);
+            //assert(c[1] == false_lit);
             i++;
 
             // If 0th watch is true, then clause is already satisfied.
@@ -1079,7 +1078,6 @@ CRef Solver::propagate()
                     CRef coverConfl = findCover(first);
                     if  (coverConfl != CRef_Undef)
                     {
-                        //return coverConfl; // TODO or jump to nextclause
                         confl = coverConfl;
                         goto NextClause;
                     }

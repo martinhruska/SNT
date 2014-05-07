@@ -348,12 +348,6 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
         while (!seen[var(trail[index--])]);
         p     = trail[index+1];
         confl = reason(var(p));
-        /*
-        vec<Lit> temp;
-        temp.push(p);
-        std::cout << "VAR: " << confl << " ";
-        printClause(temp);
-        */
         seen[var(p)] = 0;
         pathC--;
 
@@ -721,9 +715,6 @@ CRef Solver::propagate()
             assert(c[1] == false_lit);
             i++;
 
-            //std::cout << "THIS CLAUSE: \n";
-            //printClause(c);
-            //std::cout << "-------------\n";
             // If 0th watch is true, then clause is already satisfied.
             Lit     first = c[0];
             Watcher w     = Watcher(cr, first);
@@ -741,22 +732,12 @@ CRef Solver::propagate()
             *j++ = w;
             if (value(first) == l_False){
                 confl = cr;
-                /*
-                std::cout << "problem ";
-                printClause(ca[confl]);
-                */
                 qhead = trail.size();
                 // Copy the remaining watches:
                 while (i < end)
                     *j++ = *i++;
             }else
             {
-                /*
-                printAssgn();
-                std::cout << "ADDED TO DB\n";
-                printAssgn();
-                std::cout << "--------------\n";
-                */
                 uncheckedEnqueue(first, cr);
                 int varId = rcpsAdapter->getReverseVar().at(var(first));
                 if (rcpsModel->getProcessVars().count(varId) && value(var(first)) == l_True)
@@ -884,7 +865,6 @@ bool Solver::simplify()
             if (seen[var(trail[i])] == 0)
                 trail[j++] = trail[i];
         trail.shrink(i - j);
-        //printf("trail.size()= %d, qhead = %d\n", trail.size(), qhead);
         qhead = trail.size();
 
         for (int i = 0; i < released_vars.size(); i++)
@@ -928,11 +908,6 @@ lbool Solver::search(int nof_conflicts)
     for (;;){
         CRef confl = propagate();
         if (confl != CRef_Undef){
-            /*
-            std::cout << "CONFLICT\n";
-            printClause(ca[confl]);
-            printAssgn();
-            */
             // CONFLICT
             conflicts++; conflictC++;
             if (decisionLevel() == 0)
@@ -1010,12 +985,6 @@ lbool Solver::search(int nof_conflicts)
                     // Model found:
                     return l_True;
             }
-            /*
-            std::cout << "NO CONFLICT ADDED: ";
-            vec<Lit> temp;
-            temp.push(next);
-            printClause(temp);
-            */
             // Increase decision level and enqueue 'next'
             newDecisionLevel();
             uncheckedEnqueue(next);

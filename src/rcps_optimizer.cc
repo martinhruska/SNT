@@ -102,7 +102,7 @@ int RCPSOptimizer::optimize_(RCPSInstance& instance,
     int res;
     if (solved || max > instance.getUpperBound())
     { // reached lower bound
-        std::cout << "Optimal: " << max << std::endl;
+        std::cout << "Optimal: " << max-2 << std::endl;
         res = max;
     }
     else
