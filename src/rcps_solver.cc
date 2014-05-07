@@ -5,7 +5,6 @@
 #include "rcps_parser.hh"
 #include "rcps_graph.hh"
 #include "rcps_sat_model.hh"
-//#include "rcps_model_to_glucose.hh"
 #include "rcps_optimizer.hh"
 
 #define UNUSED(x) (void)(x)
@@ -47,6 +46,15 @@ int getTimeout(char *timeOption)
     return timeout;
 }
 
+void printHelp()
+{
+    std::cout << "./rcps_solver input [solver] [timeout]\n";
+    std::cout << "input .... input file from PSPLIB\n";
+    std::cout << "solver ... 'm' for minisat (default), 'g' for Glucose\n";
+    std::cout << "timeout ... timeout for solution (note, this timeout is only for rcps_solver, so the last SAT solver task will be finished)\n";
+    std::cout << "If you enter both, solver and time option, their order is compulsory\n";
+}
+
 int main(int argc, char** argv)
 {
     const int requestParams = 2;
@@ -56,11 +64,19 @@ int main(int argc, char** argv)
     if (argc < requestParams && argc > requestParams+2)
     { // 2-4 parameters allowed
         std::cerr << "Wrong number of parameters \n";
+        printHelp();
         return EXIT_FAILURE;
     }
 
     int timeout = -1;
-    int solver = 0; // 0 glucose, 1 minisat
+    int solver = 1; // 0 glucose, 1 minisat
+
+    if (strcmp(argv[infilePos], "-h") ||
+        strcmp(argv[infilePos], "-help"))
+    {
+        printHelp();
+        return EXIT_SUCCESS;
+    }
 
     if (argc == requestParams+2)
     { // timeout and solver parameters have been entered
