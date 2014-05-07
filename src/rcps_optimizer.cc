@@ -44,8 +44,6 @@ int RCPSOptimizer::optimize_(RCPSInstance& instance,
   int timeout)
 {
     int max = instance.getDueDate(); //instance.getLowerBound()-1;
-    int lastMax = max+1;
-    const int ub =instance.getUpperBound();
     bool solved = false;
     clock_t start = clock();
 
@@ -88,9 +86,8 @@ int RCPSOptimizer::optimize_(RCPSInstance& instance,
         double diffSolve =  (clock()-startSolve)/CLOCKS_PER_SEC;
         double diffCycle =  (clock()-startCycle)/CLOCKS_PER_SEC;
         //solver.printModel();
-        std::cout << "\nMax: " << max-1 << " [" << (solved==true) << "]" 
+        std::cout << "\nMakespan: " << max-1 << " [" << (solved==true) << "]" 
         << " " << diffSolve << " " << diffCycle << std::endl;
-        lastMax = max;
         ++max;
 
         if (timeout>=0 && (clock()-start)/CLOCKS_PER_SEC > timeout)
@@ -105,7 +102,7 @@ int RCPSOptimizer::optimize_(RCPSInstance& instance,
     int res;
     if (solved || max > instance.getUpperBound())
     { // reached lower bound
-        std::cout << "Successufully optimized" << std::endl;
+        std::cout << "Optimal: " << max << std::endl;
         res = max;
     }
     else
