@@ -71,8 +71,8 @@ int main(int argc, char** argv)
     int timeout = -1;
     int solver = 1; // 0 glucose, 1 minisat
 
-    if (strcmp(argv[infilePos], "-h") ||
-        strcmp(argv[infilePos], "-help"))
+    if (strcmp(argv[infilePos], "-h") == 0 ||
+        strcmp(argv[infilePos], "-help") == 0)
     {
         printHelp();
         return EXIT_SUCCESS;
@@ -94,7 +94,7 @@ int main(int argc, char** argv)
         }
     }
     else if (argc == requestParams + 1)
-    { // timeout or 
+    { // timeout or solver option
         if ((timeout=getTimeout(argv[infilePos+1])) > 0)
         { // solver is default, timeout has been set
             solver = 0;

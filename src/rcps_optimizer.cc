@@ -87,7 +87,7 @@ int RCPSOptimizer::optimize_(RCPSInstance& instance,
         double diffCycle =  (clock()-startCycle)/CLOCKS_PER_SEC;
         //solver.printModel();
         std::cout << "\nMakespan: " << max-1 << " [" << (solved==true) << "]" 
-        << " " << diffSolve << " " << diffCycle << std::endl;
+        << " " << diffSolve << " " << diffCycle << "\n" << std::endl;
         ++max;
 
         if (timeout>=0 && (clock()-start)/CLOCKS_PER_SEC > timeout)
