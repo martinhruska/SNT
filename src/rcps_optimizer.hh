@@ -13,10 +13,10 @@ class RCPSSolver::RCPSOptimizer
 {
 private:
     template <class Solver, class Transformer>
-    static int optimize_(RCPSSATModel& model, const RCPSInstance& instance,
+    static int optimize_(RCPSInstance& instance,
     	int timeout); 
 public:
-    static int optimize(RCPSSATModel& model, const RCPSInstance& instance,
+    static int optimize(RCPSInstance& instance,
     	int solver, int timeout);
 };
 

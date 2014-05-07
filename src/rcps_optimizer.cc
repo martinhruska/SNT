@@ -7,6 +7,8 @@
     #include "rcps_model_to_glucose.hh"
     #include "core/Solver.h"
 //#endif
+#include "rcps_graph.hh"
+#include "rcps_sat_model.hh"
 
 #include <iostream>
 #include <time.h>
@@ -18,18 +20,18 @@ using namespace RCPSSolver;
  * Interface for optimization function.
  * @param solver 0 .. use glucose, 1 .. use minisat
  */
-int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance,
+int RCPSOptimizer::optimize(RCPSInstance& instance,
   int solver, int timeout)
 {
     if (solver == 1)
     {
         return optimize_<Minisat::Solver, RCPSModel2Minisat>(
-            model, instance, timeout);
+            instance, timeout);
     }
     else if (solver == 0)
     {
         return optimize_<Glucose::Solver, RCPSModel2Glucose>(
-            model, instance, timeout);
+            instance, timeout);
     }
     else
     {
@@ -38,7 +40,7 @@ int RCPSOptimizer::optimize(RCPSSATModel& model, const RCPSInstance& instance,
 }
 
 template<class Solver, class Transformer>
-int RCPSOptimizer::optimize_(RCPSSATModel& model, const RCPSInstance& instance,
+int RCPSOptimizer::optimize_(RCPSInstance& instance,
   int timeout)
 {
     int max = instance.getDueDate(); //instance.getLowerBound()-1;
@@ -47,15 +49,31 @@ int RCPSOptimizer::optimize_(RCPSSATModel& model, const RCPSInstance& instance,
     bool solved = false;
     clock_t start = clock();
 
-    while (!solved && max <= ub)
+    while (!solved && max <= instance.getHorizont())
     {
         clock_t startCycle = clock();
+         
+        instance.setUpperBound(max+1); 
+        PrecedenceGraph precGraph(instance.getJobsNumber());
+        if (parseGraphFromRCPSInstance(precGraph, instance) != 0)
+        {
+            std::cerr << "Cannot parser to precedence graph\n";
+        }
+        std::cerr << "parsed graph\n";
+        rcpsFloydWarshall(precGraph);
+        std::cerr << "warshall\n";
+        storeGraphValuesToInstance(precGraph,instance);
+        std::cerr << "graph stored\n";
+        //Parser::toString(instance);
+        RCPSSATModel model;
+        createSATmodelFromRCPS(model, instance);
+        std::cerr << "model created\n";
+
         Transformer transformer;
         Solver solver(&model, &instance, &transformer);
-           
         std::cerr << "transforming\n";
         int res;
-        if ((res = modelTimeConstraint(max, ub+1,
+        if ((res = modelTimeConstraint(max, instance.getUpperBound()+1,
             model, instance)))
         {
             std::cerr << "Cannot model time constraints " << res << '\n';

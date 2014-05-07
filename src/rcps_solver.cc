@@ -111,21 +111,7 @@ int main(int argc, char** argv)
         }
         return EXIT_FAILURE;
     }
-    PrecedenceGraph precGraph(instance.getJobsNumber());
-    if (parseGraphFromRCPSInstance(precGraph, instance) != 0)
-    {
-        std::cerr << "Cannot parser to precedence graph\n";
-    }
-    std::cerr << "parsed graph\n";
-    rcpsFloydWarshall(precGraph);
-    std::cerr << "warshall\n";
-    storeGraphValuesToInstance(precGraph,instance);
-    std::cerr << "graph stored\n";
-    //Parser::toString(instance);
-    RCPSSATModel model;
-    createSATmodelFromRCPS(model, instance);
-    std::cerr << "model created\n";
-       
-    RCPSOptimizer::optimize(model, instance, solver, timeout);
+          
+    RCPSOptimizer::optimize(instance, solver, timeout);
     return EXIT_SUCCESS;
 }
