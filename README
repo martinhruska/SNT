@@ -1,0 +1,25 @@
+RCPSSolver
+Autor: Martin Hruska
+Datum: 8.5.2014
+
+Instalace:
+    make
+
+Konfigurace pred spustenim:
+    . configure.sh
+    - provede pridani knihovny MiniSAT do systemovych cest
+
+Konfigurace pred spustenim na serveru merlin:
+    . configure.sh
+    . configure_merlin.sh
+    - provede pridani potrebnych knihoven do systemovych cest
+
+Ukazkove spusteni:
+    make run
+
+Adresarova struktura:
+    bin/ ... Vysledek prekladu
+    src/ ... Zdrojove kody, vcetne pouzitych SAT solveru
+    input/ ... Pouzite vstupy z PSPLIB
+    doc/ ... Zdrojove kody Latexu pro dokumentace
+    dokumentace.pdf ... Dokumentace ve formatu PDF
