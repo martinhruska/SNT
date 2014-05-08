@@ -24,27 +24,27 @@
 
 \section{Úvod}
 \label{sec:intro}
-\rcps\ (RCPS) problém odpovídá na otázku, zdali pro danou množinu aktivit, mezi kterými je definována
+\rcps\ (RCPS) problém se táže, zdali pro danou množinu aktivit, mezi kterými je definována
 relace precedence, z~nich každá má určitou dobu trvání, určité požadavky na zdroje, jejichž množství je omezené,
 existuje výrobní rozvrh, v~němž mohou být aktivity provedeny bez konfliktů
-Optimalizace RCPS pak spočívá v~nalezení rozvrhu s~nejkratší dobou trvání.
+Optimalizace RCPS problém pak spočívá v~nalezení rozvrhu s~nejkratší dobou trvání.
 
 Jelikož je RCPS problém NP-úplný \cite{artigues:2007}, tak se k~jeho řešení používají metody jako
-lineární programování, či genetické nebo optimalizační (Ant Colony Optimization) algoritmy.
-Tato práce se zabývá implementací optimalizátoru RCPS problému, nazvaného RCPSSolver,
-další metodou a tou je redukce na SAT problém.
-Nástoje nazývané SAT solvery sloužící k~řešení instancí SAT problému učinily v~posledních letech
-svého vývoje výrazný pokrok a dokáží řešit i obtížné instance problému \cite{www:minisat,www:glucose}.
-Dále je možné při redukci RCPS problému na SAT určit zdroj exponenciální složitosti a ten
+lineární programování, genetické nebo optimalizační (Ant Colony Optimization) algoritmy, či jiné heuristiky.
+Tato práce se zabývá implementací optimalizátoru RCPS problému, nazvaného \emph{RCPSSolver},
+redukcí na SAT problém.
+Instance SAT problému se řeší nástroji nazývanými SAT solvery.
+Ty učinily v~posledních letech svého vývoje výrazný pokrok a dokáží řešit i obtížné instance problému \cite{horbach:10}.
+Při redukci RCPS problému na SAT problém je možné určit zdroj exponenciální složitosti a ten
 redukovat vhodnou implementací, při níž se předchází generování exponenciálního množství klausulí pro SAT problém.
-Výhodou tohoto řešení je také, že se nejdná pouze o~numerickou aproximaci, ale je schopné podat přesné
-výsledky.
+Výhodou tohoto řešení je také, že se nejedná pouze o~numerickou aproximaci řešení, ale podává přesné výsledky.
 Tato práce bude vycházet z~přístupu k~redukci RCPS problému na SAT problému popsaného v~\cite{horbach:10}.
 
 RCPSSolver využívá existující SAT solvery a to Glucose a MiniSAT.
 Vstupem pro RCPSSolver jsou instance RCPS problému z~PSPLIB, což je knihovna obsahující sadu benchmarků
 pro RCPS problém.
 
+Struktura tohoto dokumentu bude následující.
 Sekce \ref{sec:analysis} obsahuje analýzu problému, formální definici RCPS a SAT problémů.
 V~sekci \ref{sec:concept} je popsána samotná redukce na SAT problém a v~sekci \ref{sec:arch}
 architektura implementovaného nástroje.
@@ -53,8 +53,7 @@ Sekce \ref{sec:exps} shrnuje provedené experimenty s~vytvořeným nástrojem.
 \section{Analýza \rcps}
 \label{sec:analysis}
 V~této sekci bude napřed formálně definován \rcps\ problém a optimalizační problém související s~jeho řešení.
-Dále bude popsána knihovna PSPLIB a její formát popisu instancí RCPS problému.
-Následně budou zkoumány možnosti a způsoby využití SAT solving při řešení RCPS problému.
+Dále bude popsána knihovna PSPLIB a následně bude definován SAT problém.
 
 \subsection{Formální definice RCPS}
 \rcps je definován šesticí $(V, p, E, R, B, b)$ \cite{artigues:2007}, kde
@@ -66,7 +65,7 @@ Následně budou zkoumány možnosti a způsoby využití SAT solving při řeš
     Pokud $(A_i, A_j) \in E$, tak aktivita $A_i$ musí být provedena před aktivitou $A_j$.
     \item $R=\{R_1,\ldots,R_q\}$ je množina zdrojů.
     \item $B: R \rightarrow \mathbb{N}$ je funkce udávající kapacitu zdrojů.
-    \item $b: V~\times R \rightarrow \mathbb{N}$ je funkce udavájící množství určitého zdroje, které vyžaduje daná aktivita pro
+    \item $b: V~\times R \rightarrow \mathbb{N}$ je funkce udávající množství určitého zdroje, které vyžaduje daná aktivita pro
     svoje provádění.
 \end{enumerate}
 
@@ -81,43 +80,43 @@ Toto řešení můžeme nazývat rozvrhem.
 \end{equation}
 kde $A_t=\{A_i \in A\,|\, S_i \leq t \leq S_i+p(A_i)\}$.
 
-Kritériem optimálnosti u~\rcps je tzv. \emph{makespan}, což je doba začátku provádění aktivity $A_{n+1}$.
-Optimalizačním problémem tedy je nalézení řešení \rcps\ úlohy s~minimální makespan.
+Kritériem optimálnosti u~\rcps\ je tzv. \emph{makespan}, což je doba začátku provádění aktivity $A_{n+1}$.
+Optimalizačním problémem tedy je nalezení řešení \rcps\ úlohy s~minimální makespan.
 
 V~dalším textu jsou uvažovány \emph{single-mode} \rcps\ úlohy.
-Single-mode znamená, že aktivity dané úlohy mají pouze jeden mód činnosti,
-narozdíl od tzv. \emph{multi-mode} úloh jejichž aktivity mají více módu činnosti
+Single-mode znamená, že aktivity dané úlohy mají pouze jeden mód činnosti
+na rozdíl od tzv. \emph{multi-mode} úloh jejichž aktivity mají více módu činnosti
 a každý mód má odlišné požadavky na spotřebu zdrojů.
 
-Pro instanci RCPS problému také uvažujeme u~jejích aktivit časy nejdřívějšího a nejpozdějšího možného začátku (a
+Pro instanci RCPS problému také uvažujeme u~jejich aktivit časy nejdřívějšího a nejpozdějšího možného začátku (a
 také konce) činnosti dané aktivity.
-Dále se pro instanci zjišťuje doba tvrání \emph{kritické} cesty váženým grafem vytvořeným tak, že uzly odpovídají jednotlivým
+Dále se pro instanci zjišťuje doba hodnota \emph{kritické} cesty váženým grafem vytvořeným tak, že uzly odpovídají jednotlivým
 aktivitám a hrany jsou ohodnoceny dobou jejich trvání a jsou mezi uzly, jejichž aktivity jsou navzájem v~precedenční
 relaci.
 Kritická cesta je nejdelší cesta mezi uzly představujícími aktivitu $0$ a aktivitu $n+1$ a je vypočítána
-pomocí Floyd-warshallova algoritmu.
+pomocí Floyd-Warshallova algoritmu.
 Z~tohoto výpočtu dostáváme také údaje o~nejdelších cestách mezi jednotlivými uzly, což lze následně použít
 při výpočtu doby nejdřívějšího a nejpozdějšího začátku.
 Kritická cesta pak představuje dobu, za kterou by šla úloha splnit nejdříve, pokud by neexistovalo omezení dané
-množství zdrojů, ale pouze omezení dané precendenční relací.
+množství zdrojů, ale pouze omezení dané precedenční relací.
 Kritická cesta bude v~následujícím textu uvažována jako spodní hranice řešení, tedy hranice u~níž víme, že nelze
 dosáhnout nižšího makespan, než je její hodnota.
 Opakem je poté horní hranice řešení, která udává maximální dobu, kterou může makespan nabývat a jejíž volba
 byla během implementace různá, více v~sekci \ref{sec:arch}.
 
 \subsection{PSPLIB}
-PSPLIB je knihovna združíjící sady instancí \rcps\ problému v~jeho různých variantách a jejich optimální a heuristická řešení \cite{psplib}.
+PSPLIB je knihovna sdružující sady instancí \rcps\ problému v~jeho různých variantách a jejich optimální a heuristická řešení \cite{psplib}.
 Knihovna používá ke generování instancí problému vlastní nástroj \emph{ProGen}.
-Ve shodě se zadáním projektu byly použita data knihovny PSPLIB jako vstupy dokumentováného nástroje.
+Ve shodě se zadáním projektu byly použita data knihovny PSPLIB jako vstupy dokumentovaného nástroje.
 Použití knihovny je vhodné také díky možnosti porovnávat výstupy vytvořeného programu s~optimálními řešeními, které
 knihovna pro mnoho instancí problému obsahuje.
-Příklad vstupních dat lze najít v~adresáří \emph{input}.
+Příklad vstupních dat lze najít v~adresáři \emph{input}.
 
-\subsection{SAT Solvinig}
-Metody a nástroje SAT solvingu se zabývají řešením SAT problému (který je NP-úplný),
+\subsection{SAT Solving}
+Metody a nástroje SAT solvingu se zabývají řešením SAT problému (je NP-úplný),
 který odpovídá na otázku, zdali je daná formule výrokové logiky splnitelná.
-V~našem případě uvažujeme formuli výrokové logiky v~\emph{konjunktnivní} normální formě (CNF).
-formule je definovaná přes množinu proměnných, které nabývají hodnoty z~množiny $\{true, false\}$
+V~našem případě uvažujeme formuli výrokové logiky v~\emph{konjunktivní} normální formě (CNF).
+Taková formule je definovaná přes množinu proměnných, které nabývají hodnoty z~množiny $\{true, false\}$
 a je složena z~následujících prvků:
  \begin{itemize}
  	\item \emph{Literálu}, což jsou samotné proměnné nebo jejich negace
@@ -126,31 +125,31 @@ a je složena z~následujících prvků:
  \end{itemize}.
 
 Ohodnocení formule je konkrétní zobrazení jejich proměnných na hodnoty $\{true, false\}$.
-Formule je \emph{splnitélná}, pokud existuje ohodnocení, při kterém je celá formule vyhodnocena
+Formule je \emph{splnitelná}, pokud existuje ohodnocení, při kterém je celá formule vyhodnocena
 jako $true$.
 Takové ohodnocení se potom nazývá modelem formule v~CNF.
 
 Programy řešící SAT problém se nazývají \emph{SAT Solvery}.
-V~poslední době proběhl v~oblastni SAT solverů výrazný pokrok a mnohé z~nich jsou již
+V~poslední době proběhl v~oblasti SAT solverů výrazný pokrok a mnohé z~nich jsou již
 schopny  řešit SAT problémy obsahující velké formule.
 Porovnání možností a výkonu SAT solverů lze najít na \cite{www:sat}.
 
-Základním algoritmem použivaným v~SAT Solvingu (a dnešních SAT Solverech) je
+Základním algoritmem používaným v~SAT Solvingu (a dnešních SAT Solverech) je
 \emph{Davis–Putnam\-Logemann–Loveland (DPLL) algoritmus} \cite{dpll:1960, dpll:1962}.
-Algoritmus lze najít v~\ref{alg:dpll} a bude následovat jeho krátký popis.
+Algoritmus je uveden v~Algoritmu \ref{alg:dpll} a bude následovat jeho krátký popis.
 
-Funkce \emph{propagate} ohodnotí proměnné na základé aktuálního částečného ohodnocení tak, že
+Funkce \emph{propagate} ohodnotí proměnné na základě aktuálního částečného ohodnocení tak, že
 provedená nová ohodnocení jsou důsledkem aktuálního stavu.
-Pokud při tomtu ohodnocení nevznikne konflikt, t.j. jedna klausule při učitém ohodnocení některé z~proměnných nabyde hodnoty $true$,
+Pokud při tomto ohodnocení nevznikne konflikt, t.j. jedna klausule při určitém ohodnocení některé z~proměnných nabude hodnoty $true$,
 zatímco jiná (konfliktní) klausule se při takovémto ohodnocení stane $false$, tak pokud jsou již ohodnoceny všechny proměnné, je vrácena
 hodnota $true$.
 Pokud konflikt nenastane, ale nejsou ohodnoceny všechny proměnné tak, je zvýšena úroveň zanoření při rozhodování (proměnná decision\_level)
 a je zavolána funkce \emph{decide}, která rozhodne, která další proměnná bude ohodnocena a na které se tedy bude další výpočet větvit.
 
 Pokud funkce propagate vrátí konfliktní klausuli, tak je zavolána funkce \emph{analyze}, která určí ke které úrovni zanoření při ohodnocování
-proměnných se bude navracet.
-Všechna ohodnocení provedena hloubějí než v~této úrovni jsou pak zrušena.
-V~moderních SAT Solverech funkce analyze také dokáže vytvořit \emph{naučenou} klausuli, která je důsledkem aktuální databáse klausulí a která
+proměnných se bude navracet, aby bylo možné konfliktu předejít.
+Všechna ohodnocení provedena hlouběji než v~této úrovni jsou pak zrušena.
+V~moderních SAT Solverech funkce analyze také dokáže vytvořit \emph{naučenou} klausuli, která je důsledkem aktuální databáze klausulí a která
 má popisovat příčinu posledního konfliktu konfliktu.
 
 \begin{algorithm}
@@ -189,14 +188,12 @@ má popisovat příčinu posledního konfliktu konfliktu.
 V~této práci byly použity SAT Solvery \emph{MiniSAT} \cite{www:minisat} a \emph{Glucose} \cite{www:glucose}, která
 používají další optimalizace k~zlepšení efektivity výpočtu.
 MiniSAT byl vybrán na základě článku \cite{horbach:10}, kde byl úspěšně použit právě pro řešení RCPS problému.
-Glucose je solver založený na MiniSATu, ale implementující některé další optimalizace, a proto s~ní budou provedeny
-experimenty, které si kladou za cíl zjistit, zdali přináší zlepšení pro výkonu při řešení RCPS problému.
-% how is it used in my model
-% used sat solvers
+Glucose je solver založený na MiniSATu, ale implementující některé další optimalizace.
+Jelikož Glucose zachovává rozhraní MiniSATu je možné ho rozšířit stejným způsobem.
 
 \section{Konceptuální model}
 \label{sec:concept}
-RCPS problém lze řešit jeho redukcí na SAT problém a následním řešením pomocí SAT solveru.
+Jak již bylo zmíněno, v~této práci je RCPS problém řešen jeho redukcí na SAT problém a následným použitím pomocí SAT solveru.
 V~této kapitole bude právě tato redukce popsána a to dle přístupu z~\cite{horbach:10}.
 
 SAT formule budou definovány nad následujícími proměnnými:
@@ -214,7 +211,7 @@ SAT formule budou definovány nad následujícími proměnnými:
     $u_{it}=
         \left\{
         \begin{array}{ll}
-             true & \mbox{pokud} \emph{ aktivita }j \emph{ je ve zpracování  v~čase }t \\
+             true & \mbox{pokud} \emph{ aktivita }j \emph{ je prováděna  v~čase }t \\
              false & \mbox{jinak}\\
         \end{array}
         \right.
@@ -227,73 +224,74 @@ Správná kombinace startovacích a procesních proměnných je zaručena pomoc�
 \label{eq:1}
    \neg s_{it} \vee u_{il},\emph{ kde } i\in\{es_i,\ldots,ls_i\}, l\in\{t,\ldots,t+d_i-1\}  
 \end{equation}
+kde $t$ je doba začátku aktivity.
 
 Dodržení omezení daných precedenční relací zajišťují tzv. \emph{precedenční klausule}:
 \begin{equation}
 \label{eq:2}
    \neg s_{it} \bigvee_{l\in\{es_j,\ldots,t-d_j\}} s_{jl},\emph{ kde } (j,i) \in E, t \in\{es_i,\ldots,ls_i\}   
 \end{equation}
-Oproti přísputu z~\cite{horbach:10} je zde použito $l\in\{es_j,\ldots,t-d_j\}$ namísto $l\in\{es_j,\ldots,es_i-d_j\}$ tak,
+Oproti přístupu z~\cite{horbach:10} je zde použito $l\in\{es_j,\ldots,t-d_j\}$ namísto $l\in\{es_j,\ldots,es_i-d_j\}$ tak,
 aby klausule skutečně vyjadřovala, že začne-li aktivita $i$ v~čase $t$, tak aktivita, která ji má dle precedenční
-relace předcházet, začala dříve alespoň o~svého trvání.
+relace předcházet, začala dříve alespoň o~dobu svého trvání.
 
-Dalším typem klasulí jsou \emph{klausule startovací}, které zaručují, že každá aktivita někdy začne:
+Dalším typem klausulí jsou \emph{klausule startovací}, které zaručují, že každá aktivita někdy začne:
 \begin{equation}
 \label{eq:3}
    \bigvee_{t\in\{es_i,\ldots,ls_{i}\}} s_{it},\emph{ kde } i \in
 V~\end{equation}
 
-Dosud uvedené klausule nezaručují, že nebude v~jeden okamžik naplánováno více aktivit, které ovšem můžou mít rozdílné
+Dosud uvedené klausule nezaručují, že nebude v~jeden okamžik naplánováno více aktivit, které ovšem můžou mít dohromady
 větší nároky na některý zdroj než je jeho dostupné množství.
-Takovotou množinu aktivit $C$, pro kterou u~některého zdroje $k$ platí $\sum_{i\in C} r_{ik} > R_k$, nazveme \emph{pokrytím}.
+Takovouto množinu aktivit $C$, pro kterou u~některého zdroje $k$ platí $\sum_{i\in C} r_{ik} > R_k$, nazveme \emph{pokrytím}.
 Minimální pokrytí je takové, že bez některé aktivity $i\in C$, přestává být množina $C$ prokrytím.
-Nepřečerpání některého ze zdrojů lze zajistit porstřednictvím \emph{klausulí pokrytí}:
+Nepřečerpání některého ze zdrojů lze zajistit prostřednictvím \emph{klausulí pokrytí}:
 \begin{equation}
 \label{eq:4}
    \bigvee_{i\in C} \neg u_{it},\emph{ kde } t\in{0,\ldots,T-1}, C \emph{ je minimální pokrytí}   
 \end{equation}
 
-Každá množina klausulí z~\ref{eq:1},\ref{eq:2},\ref{eq:3} nabývá polynomiální velikosti a je tedy řešitelná pomocí moderních SAT solverů,
+Každá množina klausulí z~definic~\ref{eq:1},\ref{eq:2},\ref{eq:3} nabývá polynomiální velikosti a je tedy řešitelná pomocí moderních SAT solverů,
 a proto je možné je vygenerovat na základě instance RCPS problému před spuštěním SAT solveru.
-Počet klausulí \ref{eq:4} ovšem roste exponencíálně, a tudíž by jejich kompletní vygenerování bylo možné jen pro instance
+Počet klausulí z~definice \ref{eq:4} ovšem roste exponenciálně, a tudíž by jejich kompletní vygenerování bylo možné jen pro instance
 s~malým počtem aktivit,
-Proto jsou tyto klasule v~dokumentované implementaci přídávány do databáse SAT solveru dynamicky.
+Proto jsou tyto klausule v~dokumentované implementaci přidávány do databáze SAT solveru dynamicky.
 Bližší informace stran implementace samotné jsou v~sekci \ref{sec:arch}.
 
 Aby bylo možné provádět samotnou optimalizaci, je třeba přidat klausule omezující maximální makespan.
 Nazvěme tyto klausule \emph{časovými}:
 \begin{equation}
 \label{eq:5}
-   \bigvee_{i\in C} \neg s_{n+1,t},\emph{ kde } t\in{l+1,\ldots,ls_{n+1}}, \emph{ l je maximální makespan}   
+   \neg s_{n+1,t}\emph{ kde } t\in{(l+1),\ldots, ub}, \emph{ l je maximální makespan, ub je horní hranice.}
 \end{equation}
 
 Stejně jako v~\cite{horbach:10} byly přidány následující klausule, které přináší zrychlení výpočtu SAT solveru:
 \begin{equation}
 \label{eq:6}
-   \neg u_{it} \vee u_{i,t+1} \vee u_{i,t-d_i+1},\emph{ kde } i\in V, s\in\{ef_i,\ldots,lf_i-1\}  
+   \neg u_{it} \vee u_{i,t+1} \vee u_{i,t-d_i+1},\emph{ kde } i\in V, t\in\{ef_i,\ldots,lf_i-1\}  
 \end{equation}
 Klausule udávají, že doba $t$ je doba konce aktivity $i$ a SAT solver může odvodit, že aktivita $i$ začíná v~době
 $t-d_i+1$.
 
-Tím je redukce RCPS problému na SAT problém kompletní včetně zakódování optimalizačního problému a přídání
+Tím je redukce RCPS problému na SAT problém kompletní včetně zakódování optimalizačního problému a přidání
 klausulí zrychlujících výpočet SAT Solveru.
 
 \section{Architektura}
 \label{sec:arch}
 V~této sekci bude popsána architektura implementovaného programu, implementační optimalizace a budou zmíněny použité SAT Solvery.
 
-Logický návrh architektury programu je na obrázku \ref{fig:arch}.
+Logický návrh architektury programu je na Obrázku \ref{fig:arch}.
 Program nejprve načte vstup, kterým je soubor z~knihovny PSPLIB, poté ho
-převede do interní reprezentace (na Obrázku jako \emph{Instance RCPS problému}).
-V~této interní reprezentaci se instance RCPS problému předá optimilazátoru,
-který pomocí příslušných modulů vypočte kritckou cestu a s~ní související informace a doplní je do reprezentace RCPS problému.
+převede do interní reprezentace (na Obrázku \ref{fig:arch} jako \emph{Instance RCPS problému}).
+V~této interní reprezentaci se instance RCPS problému předá optimalizátoru,
+který pomocí příslušných modulů vypočte kritickou cestu a s~ní související informace a doplní je do reprezentace RCPS problému.
 Následně je vytvořena interní reprezentace SAT problému (SAT formule v~CNF), která je následně
-převedena do reprezentace příslušného SAT Solveru, který je v~nazávěr spuštěn.
-Toto optimalizátor postupně provádí pro jednotlivé makespan, dokuď není nalezen ten nejnížší možný.
+převedena do reprezentace příslušného SAT Solveru, který je na závěr spuštěn.
+Toto optimalizátor postupně provádí pro jednotlivé makespan, dokud není nalezen ten nejnižší možný.
 \begin{figure}
 \begin{center}
     \input{arch.tikz}
-    \caption{Koncptuální návrh programu}
+    \caption{Konceptuální návrh programu}
     \label{fig:arch}
 \end{center}
 \end{figure}
@@ -307,12 +305,12 @@ Následuje seznam tříd implementující jednotlivé bloky z~logického návrhu
     \end{itemize}
  \item Instance RCPS problému
     \begin{itemize}
-        \item Třída \emph{RCPSInstance} v~sobě uchováva informace uvedené v~definici RCPS problému v~sekci \ref{sec:analysis}.
+        \item Třída \emph{RCPSInstance} v~sobě uchovává informace uvedené v~definici RCPS problému v~sekci \ref{sec:analysis}.
         Uchovává také informace o~nejdřívějších a nejpozdějších možných časech začátků a konců jednotlivých aktivit.
     \end{itemize}
  \item Výpočet kritické cesty
     \begin{itemize}
-        \item Třída \emph{RCPSGraph} reprezentuje graf, do které ho je převeden RCPS problém, aby mohla být spočítáná kritická cesta a s~ní
+        \item Třída \emph{RCPSGraph} reprezentuje graf, do které ho je převeden RCPS problém, aby mohla být spočítaná kritická cesta a s~ní
         související informace jako možné časy začátků a konců aktivit.
         Obsahuje také metody pro výpočet této kritické cesty pomocí Floyd-Warshallova algoritmu.
     \end{itemize}
@@ -330,10 +328,10 @@ Následuje seznam tříd implementující jednotlivé bloky z~logického návrhu
     \end{itemize}
  \item Byly použity následující dva SAT solvery:
     \begin{itemize}
-        \item \emph{MiniSAT} \cite{www:minisat} je SAT solver použíty v~\cite{horbach:10}.
-        Dříve patřil mezi nejlepší SAT solvery (oceněný v~soutěži \cite{www:sat}), dnes již neimplemetuje
+        \item \emph{MiniSAT} \cite{www:minisat} je SAT solver použity v~\cite{horbach:10}.
+        Dříve patřil mezi nejlepší SAT solvery (oceněný v~soutěži \cite{www:sat}), dnes již neimplementuje
         všechny aktuální heuristiky a optimalizace používaný v~SAT Solvingu.
-        \item \emph{Glucose} \cite{www:glucose} je nádstavnou nad MiniSAT, která implementuje
+        \item \emph{Glucose} \cite{www:glucose} je nadstavbou nad MiniSAT, která implementuje
         pokročilejší optimalizace a je v~posledních letech oceňována v~soutěži SAT Competition \cite{www:sat}.
         Zachovává rozhraní MiniSAT, tudíž ji bylo možné použít bez nutnosti výraznějších změn postupů použitých při
         modifikaci MiniSAT.
@@ -345,28 +343,28 @@ Následuje seznam tříd implementující jednotlivé bloky z~logického návrhu
 \end{itemize}
 
 \subsection{Modifikace SAT solveru}
-Jak bylo řečeno v~sekci \ref{sec:concept}, množství klausulí pokrytí \ref{eq:4} dosahuje exponenciální složitosti,
+Jak bylo řečeno v~sekci \ref{sec:concept}, roste množství klausulí pokrytí \ref{eq:4} exponenciálně,
 proto není možné tyto klausule vygenerovat před spuštěním samotného SAT solveru.
 Je nutné je generovat dle potřeby během výpočtu, což lze udělat tak \cite{horbach:10}, že je spuštěn SAT solver bez
 těchto klausulí a na základě vypočteného ohodnocení proměnných je ověřováno, že v~žádném čase
 nedošlo k~přečerpání žádného zdroje.
-Pokud by k~tomuto došlo, je přidána příslušná klausule pokrytí, která tomuto zabrání a SAT solver je spuštěn
+Pokud by k~tomuto došlo, je přidána příslušná klausule pokrytí, která tomu zabrání a SAT solver je spuštěn
 znovu.
 Nevýhoda tohoto přístupu je taková, že SAT solver vždy ztrácí celý kontext výpočtu a musí začínat od začátku, a proto
 je tento přístup vhodný jen u~malých problému, a tedy nebyl v~této práci implementován.
 
-Implementován byl přístup, který modifikuje fukci \emph{propagate} v~SAT solveru.
+Implementován byl přístup, který modifikuje funkci \emph{propagate} v~SAT solveru.
 Vždy když je pravdivě ohodnocen nějaký literál obsahující procesní proměnnou $u_{it}$, tak je zkontrolováno,
 zdali tímto ohodnocením není v~čase $t$ překročeno množství některého ze zdrojů použitých aktivitou $i$.
-Pokud ano, je vygenerována příslušná klausle pokrytí, která je přidána do databáse klausulí a vrácena jako konflitkní klausule.
-Pokud k~takovému porušení nedocházi, jsou vygenerovány klausule pokrytí zabraňující tomu, aby byla 
+Pokud ano, je vygenerována příslušná klausule pokrytí, která je přidána do databáze klausulí a vrácena jako konfliktní klausule.
+Pokud k~takovému porušení nedochází, jsou vygenerovány klausule pokrytí zabraňující tomu, aby byla 
 (dosud neohodnocená) procesní proměnná $u_{jt}$ ohodnocena jako $true$,
 pokud by činnost aktivity $j$ v~čase $t$ vedla k~přečerpání některého ze zdrojů.
 
 Přidání nové klausule za běhu nebylo možné provést přes funkci \emph{addClause} z~rozhraní SAT solverů, ale použitím
-interní funkce \emph{attachClause} a přidáním nové klausule na zásobník klauslí v~proměnné \emph{clauses}.
+interní funkce \emph{attachClause} a přidáním nové klausule na zásobník klausulí v~proměnné \emph{clauses}.
 
-Další provednou optimalizací je upřednostnění výběru procesních proměnných ve funkci \emph{decide} před výběrem
+Další provedenou optimalizací je upřednostnění výběru procesních proměnných ve funkci \emph{decide} před výběrem
 startovacích proměnných.
 Tato optimalizace je také navržena v~\cite{horbach:10} a empirickými experimenty s~programem RCPSSolver
 byl ověřeno, že skutečně zrychluje výpočet.
@@ -380,7 +378,7 @@ byla dána kritickou cestou.
 Poslední makespan, u~kterého bylo možné najít řešení RCPS problému byl pak prohlášen
 za optimální řešení.
 Tento přístup se ovšem ukázal jako velmi neefektivní, a proto byl
-implementován jiný, kde se prohledává od spodní hranice dané kritickou cestou,
+implementován jiný, v~němž se prohledává od spodní hranice dané kritickou cestou,
 makespan se zvyšuje o~jedna a jako horní hranice je brána hodnota o~jedna
 vyšší než aktuální makespan.
 Pro tuto horní hranici jsou spočteny nejdřívější a nejpozdější možné začátky
@@ -392,13 +390,13 @@ v~rozhodování jedné instance SAT problému, protože obsahují méně proměn
 \label{sub:impl}
 SAT solvery při řešení větších instancí končily chybou \texttt{segmentation fault}.
 Příčinu této chyby se nepodařilo zjistit a není zřejmé, zdali se jedná
-o~chybu zanešenou implementací dynamického přidávání klausulí a nebo o~chybu
+o~chybu zanesenou implementací dynamického přidávání klausulí a nebo o~chybu
 způsobenou velikostí řešeného problému.
 Proto v~případech, kdy by mělo k~chybě \texttt{segmentation fault} dojít,
 je daná instance prohlášena za nesplnitelnou a je zvětšen makespan.
-Touto cestou nelze najít opravdu optimální řešení, protože přávě kolem
-hodnoty optimálního makespan dochází k~nárustu složitosti výpočtu a tedy
-i zmíněné chybě, ale lze dostat alespoň suboptimální řešení udavající
+Touto cestou nelze najít opravdu optimální řešení, protože právě kolem
+hodnoty optimálního makespan dochází k~nárůstu složitosti výpočtu a tedy
+i zmíněné chybě, ale lze dostat alespoň suboptimální řešení udávající
 nejnižší makespan, pro který jde úloha vyřešit.
 V~případě, že je použita tato heuristika, je vypsáno na standardní výstup
 \emph{NOT OPTIMAL}, aby bylo zřejmé, že výsledek nemusí být přesný.
@@ -424,8 +422,8 @@ v~\cite{horbach:10} přesně popsána.
 \begin{center}
   \begin{tabular}{ | l | r | r | r | r | r | r |}
    \hline
-    & \textbf{Optimalizována [\%]} & Pod 1s [\%] & Pod 2s [\%] & Pod 5s [\%] & Pod 10s [\%] Pod 50s [\%]\\ \hline \hline
-    j30 &$44454.7$ & $46500.9$ & & & \\ \hline
+    & \textbf{Optimalizována [\%]} & Do 1s [\%] & Do 2s [\%] & Do 5s [\%] & Do 10s [\%] Do 50s [\%]\\ \hline \hline
+    j30 &$83$ & $67$ & $21$  &$2$ & \\ \hline
     j60 & $47893.3$ & $48186.44$ & & & \\ \hline
     j120 & $42 029$ & $42 029$ & & & \\ \hline
    \end{tabular}
@@ -450,24 +448,24 @@ v~\cite{horbach:10} přesně popsána.
     \label{pic:j120}
 \end{figure}
 
-Dalším výstupem experimentů jsou grafy \ref{pic:j30}, \ref{pic:j60}, \ref{pic:j120},
+Dalším výstupem experimentů jsou grafy \ref{pic:j30}, \ref{pic:j120},
 které ukazují dobu, kterou SAT solver potřeboval na rozhodnutí instance SAT problému
 s~daným makespanem, v~závislosti na vzdálenosti tohoto makespan od optimálního.
 V~grafu jsou zaneseny jen výsledky, u~nichž byla doba řešení úlohy delší nebo rovna 1 sekunda.
-Nicméně, takovýchto případů bylo pouze TODO
-Z~grafu je patrné, že náročnost na řešení instancí SAT problému vztoupala blíže optimálnímu řešení instance RCPS problému.
-Několik případů v~každé sadě bylo velmi náročných, což odpovídá výraznému navýšenní doby výpočtu v~blízkosti optima.
+Takovýchto případů bylo $20\%$ u~sady j30, TODO.
+Z~grafu je patrné, že náročnost na řešení instancí SAT problému vzrostla blíže optimálnímu řešení instance RCPS problému.
+Několik případů v~každé sadě bylo velmi náročných, což odpovídá výraznému navýšení doby výpočtu v~blízkosti optima.
 
 Provedené experimenty ukazují, že pomocí SAT solvingu se daří optimalizovat většinu instancí z~PSPLIB.
 Nicméně v~každé sadě se nachází několik těžkých případů, které se nepodařilo RCPSSolveru vyřešit.
-U~těchto těžkých případů také docházelo také k~nárustu doby výpočtu SAT solveru, který jinak dokázal
+U~těchto těžkých případů také docházelo také k~nárůstu doby výpočtu SAT solveru, který jinak dokázal
 řešit zadané problémy velmi rychle.
 
 \section{Závěr}
-Byl implementován nástroj RCPSSolver pro optimalizaci instantcí RCPS problému.
-Nástroj je založen na redukci RCPS problému na SAT solving přístupem popsaným v~\cite{horbach:10}.
+Byl implementován nástroj RCPSSolver pro optimalizaci instancí RCPS problému.
+Nástroj je založen na redukci RCPS problému na SAT problém přístupem popsaným v~\cite{horbach:10}.
 RCPSSolver využívá jak SAT solvery nástroje MiniSAT a Glucose, které byly modifikovány tak,
-aby se předešlo exponenciální složitosti při řešení SAT problému.
+aby se omezila exponenciální složitost při řešení SAT problému.
 S~nástrojem RCPSSolver byly provedeny experimenty nad instancemi RCPS problému
 z~knihovny PSPLIB, které nástroj podporuje jako svoje vstupy.
 V~experimentech se nedařilo dosáhnout stejně kvalitních výsledků, jichž bylo dosaženo v~\cite{horbach:10},
@@ -478,7 +476,7 @@ může být efektivním přístupem k~optimalizaci instancí RCPS problému.
 Další vývoj práce může být zaměřen na použití dalšího SAT solveru, či hlubší
 modifikace některého z~použitých SAT solverů.
 Také je možné zvolit jinou formulaci redukce na SAT problém, která by mohla být
-efektivnější, či zvážit přídání dalších redundantních klausulí, které by ovšem
+efektivnější, či zvážit přidání dalších redundantních klausulí, které by ovšem
 zrychlily výpočet SAT solveru.
 
 \newpage
@@ -488,7 +486,7 @@ zrychlily výpočet SAT solveru.
 K~projektu je přiložen soubor \emph{Makefile}, tudíž lze zdrojové kódy zkompilovat pomocí příkazu \texttt{make}.
 Pro úspěšnou kompilaci je nutné mít nainstalovaný překladač GCC verze 4.8.
 Před spuštění je třeba dokončit konfiguraci prostředí skriptem \texttt{configure.sh},
-který přidá do systemových proměnných cestu ke knihovnám MiniSAT.
+který přidá do systémových proměnných cestu ke knihovnám MiniSAT.
 Výstupem kompilace je spustitelný binární soubor \texttt{rcps\_solver} v~adresáři \texttt{bin}.
 \section{Uživatelský manuál}
 \label{app:help}
