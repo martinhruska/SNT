@@ -24,7 +24,30 @@
 
 \section{Úvod}
 \label{sec:intro}
-% speek about np hardness of problem
+\rcps\ (RCPS) problém odpovídá na otázku, zdali pro danou množinu aktivit, mezi kterými je definována
+relace precedence, z~nich každá má určitou dobu trvání, určité požadavky na zdroje, jejichž množství je omezené,
+existuje výrobní rozvrh, v~němž mohou být aktivity provedeny bez konfliktů
+Optimalizace RCPS pak spočívá v~nalezení rozvrhu s~nejkratší dobou trvání.
+
+Jelikož je RCPS problém NP-úplný \cite{artigues:2007}, tak se k~jeho řešení používají metody jako
+lineární programování, či genetické nebo optimalizační (Ant Colony Optimization) algoritmy.
+Tato práce se zabývá implementací optimalizátoru RCPS problému, nazvaného RCPSSolver,
+další metodou a tou je redukce na SAT problém.
+Nástoje nazývané SAT solvery sloužící k~řešení instancí SAT problému učinily v~posledních letech
+svého vývoje výrazný pokrok a dokáží řešit i obtížné instance problému \cite{www:minisat,www:glucose}.
+Dále je možné při redukci RCPS problému na SAT určit zdroj exponenciální složitosti a ten
+redukovat vhodnou implementací, při níž se předchází generování exponenciálního množství klausulí pro SAT problém.
+Výhodou tohoto řešení je také, že se nejdná pouze o~numerickou aproximaci, ale je schopné podat přesné
+výsledky.
+
+RCPSSolver využívá existující SAT solvery a to Glucose a MiniSAT.
+Vstupem pro RCPSSolver jsou instance RCPS problému z~PSPLIB, což je knihovna obsahující sadu benchmarků
+pro RCPS problém.
+
+Sekce \ref{sec:analysis} obsahuje analýzu problému, formální definici RCPS a SAT problémů.
+V~sekci \ref{sec:concept} je popsána samotná redukce na SAT problém a v~sekci \ref{sec:arch}
+architektura implementovaného nástroje.
+Sekce \ref{sec:exps} shrnuje provedené experimenty s~vytvořeným nástrojem.
 
 \section{Analýza \rcps}
 \label{sec:analysis}
@@ -365,6 +388,7 @@ Tento postup se ukázal jako efektivnější nejen v~hledání optimálního ře
 v~rozhodování jedné instance SAT problému, protože obsahují méně proměnných. 
 
 \subsection{Implementační problémy}
+\label{sub:impl}
 SAT solvery při řešení větších instancí končily chybou \texttt{segmentation fault}.
 Příčinu této chyby se nepodařilo zjistit a není zřejmé, zdali se jedná
 o~chybu zanešenou implementací dynamického přidávání klausulí a nebo o~chybu
@@ -375,6 +399,8 @@ Touto cestou nelze najít opravdu optimální řešení, protože přávě kolem
 hodnoty optimálního makespan dochází k~nárustu složitosti výpočtu a tedy
 i zmíněné chybě, ale lze dostat alespoň suboptimální řešení udavající
 nejnižší makespan, pro který jde úloha vyřešit.
+V~případě, že je použita tato heuristika, je vypsáno na standardní výstup
+\emph{NOT OPTIMAL}, aby bylo zřejmé, že výsledek nemusí být přesný.
 
 \section{Experimenty}
 % this is clear
@@ -418,6 +444,7 @@ Na standardní výstup pak vypisuje následující informace:
     $U$ je doba řešení SAT problému a $V$ celková doba řešení RCPS problému pro daný makespan, oba údaje jsou v~sekundách.
     \item \texttt{Done X} $\ldots$ X je celková doba výpočtu optimalizace RCPS problému v~sekundách.
     \item \texttt{Optimal: X} $\ldots$ X je optimální řešení RCPS problému nalezené RCPSolverem.
+    \item \texttt{NOT OPTIMAL} $\ldots$ byla použita heuristika ze sekce \ref{sub:impl} a výsledek nemusí být optimální.
 \end{itemize}
 Další výstupy pak mohou být informace, které vypisuje SAT solver.
 
