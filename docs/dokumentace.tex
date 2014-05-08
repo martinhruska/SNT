@@ -39,6 +39,7 @@ Dále je možné při redukci RCPS problému na SAT určit zdroj exponenciální
 redukovat vhodnou implementací, při níž se předchází generování exponenciálního množství klausulí pro SAT problém.
 Výhodou tohoto řešení je také, že se nejdná pouze o~numerickou aproximaci, ale je schopné podat přesné
 výsledky.
+Tato práce bude vycházet z~přístupu k~redukci RCPS problému na SAT problému popsaného v~\cite{horbach:10}.
 
 RCPSSolver využívá existující SAT solvery a to Glucose a MiniSAT.
 Vstupem pro RCPSSolver jsou instance RCPS problému z~PSPLIB, což je knihovna obsahující sadu benchmarků
@@ -433,6 +434,22 @@ v~\cite{horbach:10} přesně popsána.
 \end{center}
 \end{table}
 
+\begin{figure}[tb]
+    \includegraphics[scale=0.5]{dst_j30}
+    \includegraphics[scale=0.5]{dst_j30}
+    \caption{Doba výpočtu SAT solveru v~závislosti na vzdálenosti makespan od optima v~instanci RCPS problému redukovaného na SAT.
+    Výsledky pro sadu j30 (vlevo) a j60 (vpravo).}
+    \label{pic:j30}
+\end{figure}
+\begin{figure}[tb]
+    \begin{center}
+    \includegraphics[scale=0.75]{dst_j30}
+    \end{center}
+    \caption{Doba výpočtu SAT solveru v~závislosti na vzdálenosti makespan od optima v~instanci RCPS problému redukovaného na SAT.
+    Výsledky pro sadu j120.}
+    \label{pic:j120}
+\end{figure}
+
 Dalším výstupem experimentů jsou grafy \ref{pic:j30}, \ref{pic:j60}, \ref{pic:j120},
 které ukazují dobu, kterou SAT solver potřeboval na rozhodnutí instance SAT problému
 s~daným makespanem, v~závislosti na vzdálenosti tohoto makespan od optimálního.
@@ -441,19 +458,28 @@ Nicméně, takovýchto případů bylo pouze TODO
 Z~grafu je patrné, že náročnost na řešení instancí SAT problému vztoupala blíže optimálnímu řešení instance RCPS problému.
 Několik případů v~každé sadě bylo velmi náročných, což odpovídá výraznému navýšenní doby výpočtu v~blízkosti optima.
 
-\begin{figure}[tb]
-    \includegraphics[scale=0.5]{dst_j30}
-    \caption{Doba řešení instance SAT problému v~závislosti na vzdálenosti makespan od optima v~instanci RCPS problému redukovaného na SAT.}
-    \label{pic:j30}
-\end{figure}
-
 Provedené experimenty ukazují, že pomocí SAT solvingu se daří optimalizovat většinu instancí z~PSPLIB.
 Nicméně v~každé sadě se nachází několik těžkých případů, které se nepodařilo RCPSSolveru vyřešit.
 U~těchto těžkých případů také docházelo také k~nárustu doby výpočtu SAT solveru, který jinak dokázal
 řešit zadané problémy velmi rychle.
 
 \section{Závěr}
-% make this beatiful!
+Byl implementován nástroj RCPSSolver pro optimalizaci instantcí RCPS problému.
+Nástroj je založen na redukci RCPS problému na SAT solving přístupem popsaným v~\cite{horbach:10}.
+RCPSSolver využívá jak SAT solvery nástroje MiniSAT a Glucose, které byly modifikovány tak,
+aby se předešlo exponenciální složitosti při řešení SAT problému.
+S~nástrojem RCPSSolver byly provedeny experimenty nad instancemi RCPS problému
+z~knihovny PSPLIB, které nástroj podporuje jako svoje vstupy.
+V~experimentech se nedařilo dosáhnout stejně kvalitních výsledků, jichž bylo dosaženo v~\cite{horbach:10},
+což lze přisoudit možným rozdílům v~modifikaci v~SAT solveru.
+Výsledky experimentů ovšem ukazují, že přístup redukce z~RCPS problému na SAT problém
+může být efektivním přístupem k~optimalizaci instancí RCPS problému.
+
+Další vývoj práce může být zaměřen na použití dalšího SAT solveru, či hlubší
+modifikace některého z~použitých SAT solverů.
+Také je možné zvolit jinou formulaci redukce na SAT problém, která by mohla být
+efektivnější, či zvážit přídání dalších redundantních klausulí, které by ovšem
+zrychlily výpočet SAT solveru.
 
 \newpage
 \appendix
