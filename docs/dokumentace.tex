@@ -25,29 +25,29 @@
 \section{Úvod}
 \label{sec:intro}
 \rcps\ (RCPS) problém odpovídá na otázku, zdali pro danou množinu aktivit, mezi kterými je definována
-relace precedence, z~nich každá má určitou dobu trvání, určité požadavky na zdroje, jejichž množství je omezené,
-existuje výrobní rozvrh, v~němž mohou být aktivity provedeny bez konfliktů
-Optimalizace RCPS pak spočívá v~nalezení rozvrhu s~nejkratší dobou trvání.
+relace precedence, z nich každá má určitou dobu trvání, určité požadavky na zdroje, jejichž množství je omezené,
+existuje výrobní rozvrh, v němž mohou být aktivity provedeny bez konfliktů
+Optimalizace RCPS pak spočívá v nalezení rozvrhu s nejkratší dobou trvání.
 
-Jelikož je RCPS problém NP-úplný \cite{artigues:2007}, tak se k~jeho řešení používají metody jako
+Jelikož je RCPS problém NP-úplný \cite{artigues:2007}, tak se k jeho řešení používají metody jako
 lineární programování, či genetické nebo optimalizační (Ant Colony Optimization) algoritmy.
 Tato práce se zabývá implementací optimalizátoru RCPS problému, nazvaného RCPSSolver,
 další metodou a tou je redukce na SAT problém.
-Nástoje nazývané SAT solvery sloužící k~řešení instancí SAT problému učinily v~posledních letech
+Nástoje nazývané SAT solvery sloužící k řešení instancí SAT problému učinily v posledních letech
 svého vývoje výrazný pokrok a dokáží řešit i obtížné instance problému \cite{www:minisat,www:glucose}.
 Dále je možné při redukci RCPS problému na SAT určit zdroj exponenciální složitosti a ten
 redukovat vhodnou implementací, při níž se předchází generování exponenciálního množství klausulí pro SAT problém.
-Výhodou tohoto řešení je také, že se nejdná pouze o~numerickou aproximaci, ale je schopné podat přesné
+Výhodou tohoto řešení je také, že se nejdná pouze o numerickou aproximaci, ale je schopné podat přesné
 výsledky.
 
 RCPSSolver využívá existující SAT solvery a to Glucose a MiniSAT.
-Vstupem pro RCPSSolver jsou instance RCPS problému z~PSPLIB, což je knihovna obsahující sadu benchmarků
+Vstupem pro RCPSSolver jsou instance RCPS problému z PSPLIB, což je knihovna obsahující sadu benchmarků
 pro RCPS problém.
 
 Sekce \ref{sec:analysis} obsahuje analýzu problému, formální definici RCPS a SAT problémů.
-V~sekci \ref{sec:concept} je popsána samotná redukce na SAT problém a v~sekci \ref{sec:arch}
+V sekci \ref{sec:concept} je popsána samotná redukce na SAT problém a v sekci \ref{sec:arch}
 architektura implementovaného nástroje.
-Sekce \ref{sec:exps} shrnuje provedené experimenty s~vytvořeným nástrojem.
+Sekce \ref{sec:exps} shrnuje provedené experimenty s vytvořeným nástrojem.
 
 \section{Analýza \rcps}
 \label{sec:analysis}
@@ -399,11 +399,58 @@ Touto cestou nelze najít opravdu optimální řešení, protože přávě kolem
 hodnoty optimálního makespan dochází k~nárustu složitosti výpočtu a tedy
 i zmíněné chybě, ale lze dostat alespoň suboptimální řešení udavající
 nejnižší makespan, pro který jde úloha vyřešit.
-V~případě, že je použita tato heuristika, je vypsáno na standardní výstup
+V případě, že je použita tato heuristika, je vypsáno na standardní výstup
 \emph{NOT OPTIMAL}, aby bylo zřejmé, že výsledek nemusí být přesný.
 
 \section{Experimenty}
-% this is clear
+S implementovaným nástrojem byly provedeny experimenty nad vstupy
+z knihovny PSPLIB, konkrétně byly použity sady \emph{j30, j60, j120}, kde
+číslice za písmenem 'j' udává počet aktivity, které obsahují instance v dané sadě.
+Měření byla provedena na počítači s~procesorem Intel Core 2 Duo (2.13 GHz) a 4 GiB paměti.
+Časový limit pro optimalizaci jedné úlohy byl stanoven na $30$ minut.
+Experimenty byly provedeny za použití SAT solveru MiniSAT a byl měřen čas
+procesu na CPU.
+
+V tabulce \ref{table:jreses} jsou uvedeny výsledky experimentů.
+V tabulce je uvedeno procento úspěšně optimalizovaných úloh z dané sady.
+Dále také obsahuje kolik procent úloh z dané sady bylo vyřešeno pod daný časový limit.
+V porovnání s výsledky, k nimž dospěl autor v \cite{horbach:10}, není implementovaný
+RCPSSolver tak efektivní a úspěšný.
+To lze přisuzovat možným nedostatkům v modifikaci SAT solveru, jejíž přesná podoba nebyla
+v \cite{horbach:10} přesně popsána.
+
+\begin{table}[tb]
+\begin{center}
+  \begin{tabular}{ | l | r | r | r | r | r | r |}
+   \hline
+    & \textbf{Optimalizována [\%]} & Pod 1s [\%] & Pod 2s [\%] & Pod 5s [\%] & Pod 10s [\%] Pod 50s [\%]\\ \hline \hline
+    j30 &$44454.7$ & $46500.9$ & & & \\ \hline
+    j60 & $47893.3$ & $48186.44$ & & & \\ \hline
+    j120 & $42 029$ & $42 029$ & & & \\ \hline
+   \end{tabular}
+   \caption{Tabulka výsledků s experimenty se sadami j30, j60, j120 z PSPLIB.}
+   \label{table:jreses}
+\end{center}
+\end{table}
+
+Dalším výstupem experimentů jsou grafy \ref{pic:j30}, \ref{pic:j60}, \ref{pic:j120},
+které ukazují dobu, kterou SAT solver potřeboval na rozhodnutí instance SAT problému
+s daným makespanem, v závislosti na vzdálenosti tohoto makespan od optimálního.
+V grafu jsou zaneseny jen výsledky, u nichž byla doba řešení úlohy delší nebo rovna 1 sekunda.
+Nicméně, takovýchto případů bylo pouze TODO
+Z grafu je patrné, že náročnost na řešení instancí SAT problému vztoupala blíže optimálnímu řešení instance RCPS problému.
+Několik případů v každé sadě bylo velmi náročných, což odpovídá výraznému navýšenní doby výpočtu v blízkosti optima.
+
+\begin{figure}[tb]
+    \includegraphics[scale=0.5]{dst_j30}
+    \caption{Doba řešení instance SAT problému v závislosti na vzdálenosti makespan od optima v instanci RCPS problému redukovaného na SAT.}
+    \label{pic:j30}
+\end{figure}
+
+Provedené experimenty ukazují, že pomocí SAT solvingu se daří optimalizovat většinu instancí z PSPLIB.
+Nicméně v každé sadě se nachází několik těžkých případů, které se nepodařilo RCPSSolveru vyřešit.
+U těchto těžkých případů také docházelo také k nárustu doby výpočtu SAT solveru, který jinak dokázal
+řešit zadané problémy velmi rychle.
 
 \section{Závěr}
 % make this beatiful!
