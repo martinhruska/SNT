@@ -539,7 +539,10 @@ lbool Solver::analyze(CRef confl, vec<Lit>& out_learnt,vec<Lit>&selectors, int& 
 
     do{
         if (confl == CRef_Undef)
+        {
+          std::cerr << "NON OPTIMAL\n";
           return l_False;
+        }
         assert(confl != CRef_Undef); // (otherwise should be UIP)
         Clause& c = ca[confl];
 
@@ -790,6 +793,11 @@ void Solver::uncheckedEnqueue(Lit p, CRef from)
     vardata[var(p)] = mkVarData(from, decisionLevel());
     trail.push_(p);
 }
+
+/*_________________________________________________________________________________________________
+|
+|  RCPSSolver methods
+|________________________________________________________________________________________________@*/
 
 CRef Solver::findCover(Lit p)
 {

@@ -1,3 +1,9 @@
+/**
+ * RCPSSolver
+ * author: Martin Hruska
+ * e-mail: xhrusk16@stud.fit.vutbr.cz
+ */
+
 #ifndef RCPS_MODEL_OPTIMIZER
 #define RCPS_MODEL_OPTIMIZER
 
@@ -9,6 +15,9 @@ namespace RCPSSolver
     class RCPSOptimizer;
 }
 
+/**
+ * The class provides main wrapping method for optimizing given RCPS instance.
+ */
 class RCPSSolver::RCPSOptimizer
 {
 private:

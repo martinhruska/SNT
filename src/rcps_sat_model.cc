@@ -1,3 +1,9 @@
+/**
+ * RCPSSolver
+ * author: Martin Hruska
+ * e-mail: xhrusk16@stud.fit.vutbr.cz
+ */
+
 #include "rcps_sat_model.hh"
 
 #include <iostream>

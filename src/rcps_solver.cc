@@ -1,3 +1,9 @@
+/**
+ * RCPSSolver
+ * author: Martin Hruska
+ * e-mail: xhrusk16@stud.fit.vutbr.cz
+ */
+
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>

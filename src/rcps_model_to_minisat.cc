@@ -1,3 +1,9 @@
+/**
+ * RCPSSolver
+ * author: Martin Hruska
+ * e-mail: xhrusk16@stud.fit.vutbr.cz
+ */
+
 #include "rcps_model_to_minisat.hh"
 
 #include "minisat/mtl/Vec.h"

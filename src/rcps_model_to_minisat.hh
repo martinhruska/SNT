@@ -1,3 +1,9 @@
+/**
+ * RCPSSolver
+ * author: Martin Hruska
+ * e-mail: xhrusk16@stud.fit.vutbr.cz
+ */
+
 #ifndef RCPS_MODEL_MINISAT
 #define RCPS_MODEL_MINISAT
 

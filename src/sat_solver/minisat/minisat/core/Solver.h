@@ -298,7 +298,7 @@ protected:
     const RCPSSolver::RCPSInstance* rcpsInstance;
     RCPSSolver::RCPSModel2Minisat* rcpsAdapter;
 
-public:
+public: // RCPSSolver members
     CRef findCover(Lit p);
     template<class T> void printClause(T& clause);
     template<class T> void printCont(T& cont);

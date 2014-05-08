@@ -1,3 +1,9 @@
+/**
+ * RCPSSolver
+ * author: Martin Hruska
+ * e-mail: xhrusk16@stud.fit.vutbr.cz
+ */
+ 
 #ifndef RCPS_SOLVER_PARSER_HH
 #define RCPS_SOLVER_PARSER_HH
 

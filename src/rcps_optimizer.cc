@@ -1,12 +1,15 @@
+/**
+ * RCPSSolver
+ * author: Martin Hruska
+ * e-mail: xhrusk16@stud.fit.vutbr.cz
+ */
+
 #include "rcps_optimizer.hh"
 
-//#ifdef MINISAT_OPT
-    #include "minisat/core/Solver.h"
-    #include "rcps_model_to_minisat.hh"
-//#else
-    #include "rcps_model_to_glucose.hh"
-    #include "core/Solver.h"
-//#endif
+#include "minisat/core/Solver.h"
+#include "rcps_model_to_minisat.hh"
+#include "rcps_model_to_glucose.hh"
+#include "core/Solver.h"
 #include "rcps_graph.hh"
 #include "rcps_sat_model.hh"
 
@@ -18,7 +21,9 @@ using namespace RCPSSolver;
 
 /**
  * Interface for optimization function.
+ * @param instance ... RCPS instance object
  * @param solver 0 .. use glucose, 1 .. use minisat
+ * @param timeout ... timeout for solving
  */
 int RCPSOptimizer::optimize(RCPSInstance& instance,
   int solver, int timeout)
@@ -48,7 +53,7 @@ int RCPSOptimizer::optimize_(RCPSInstance& instance,
     clock_t start = clock();
 
     while (!solved && max <= instance.getHorizont())
-    {
+    { // cycle until problem is opitmized
         clock_t startCycle = clock();
          
         instance.setUpperBound(max+1); 
@@ -62,7 +67,6 @@ int RCPSOptimizer::optimize_(RCPSInstance& instance,
         std::cerr << "warshall\n";
         storeGraphValuesToInstance(precGraph,instance);
         std::cerr << "graph stored\n";
-        //Parser::toString(instance);
         RCPSSATModel model;
         createSATmodelFromRCPS(model, instance);
         std::cerr << "model created\n";
@@ -78,7 +82,6 @@ int RCPSOptimizer::optimize_(RCPSInstance& instance,
             break;
         }
         transformer.transformModel2Solver(model, solver);
-        //printModel(model);
         std::cerr << "transformed\n";
         std::cerr << "START SOLVING\n";
         clock_t startSolve = clock();
@@ -107,7 +110,7 @@ int RCPSOptimizer::optimize_(RCPSInstance& instance,
     }
     else
     {
-        res = max; //lastMax;
+        res = max;
     }
 
     return res;
