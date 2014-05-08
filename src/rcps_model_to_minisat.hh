@@ -17,6 +17,9 @@ namespace RCPSSolver
     class RCPSModel2Minisat;
 }
 
+/**
+ * Class for transformation of internal model to minisat.
+ */
 class RCPSSolver::RCPSModel2Minisat
 {
 private: // data types

@@ -16,6 +16,10 @@ namespace RCPSSolver
     class Parser;
 }
 
+/**
+ * Class for parsing PSPLIB input file.
+ * It fills RCPSInstance object with information about inpu.
+ */
 class RCPSSolver::Parser
 {
 public:

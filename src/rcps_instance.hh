@@ -14,11 +14,17 @@ namespace RCPSSolver
     class RCPSInstance;
 }
 
+/**
+ * Class for representation of RCPS instance.
+ * It keeps information about number of jobs,
+ * precendence, resources, etc..
+ */
 class RCPSSolver::RCPSInstance
 {
 public: // public constructor
     RCPSInstance(){}; 
 private: // private data members
+    // info according to RCPS definition
     int jobs_;
     int resources_;
     Vector durations_;
@@ -102,7 +108,6 @@ public: // public member functions
     const Vector& getResourcesAval() const {return resourcesAval_;}
 
 public: // friend functions
-    //friend int parse(RCPSInstance& instance, const char* source);
     friend class Parser;
 };
 

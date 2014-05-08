@@ -80,7 +80,8 @@ int RCPSSolver::storeGraphValuesToInstance(const PrecedenceGraph& graph,
         int eStart = graph.graph_[0][job]; // time between start and given job
         instance.setEStart(job, eStart);
         instance.setEFinish(job, eStart+duration);
-        int lStart = ub-graph.graph_[job][lastJob]; // time between given job and it finish
+        // time between given job and it finish
+        int lStart = ub-graph.graph_[job][lastJob];
         instance.setLStart(job, lStart);
         instance.setLFinish(job, lStart+duration);
     }

@@ -11,8 +11,12 @@
 #include <string>
 #include <unordered_map>
 
+/**
+ * Types of RCPSSolver
+ */
 namespace RCPSSolver
 {
+    // information about RCPS solver
     typedef int JobType;
     typedef int ResourceType;
     typedef std::vector<int> Vector;
@@ -20,7 +24,7 @@ namespace RCPSSolver
     typedef std::unordered_map<std::string, int> Translator;
 
     struct Variable
-    {
+    { // SAT variable
         int id;
         JobType job;
         int time;
@@ -29,7 +33,7 @@ namespace RCPSSolver
     };
 
     inline Variable createVariable(int id, JobType job, int time)
-    {
+    { // Variable constructor
         Variable v;
         v.id = id;
         v.job = job;
@@ -39,7 +43,7 @@ namespace RCPSSolver
     }
 
     struct Literal
-    {
+    { // SAT literal
         struct Variable* var;
         bool sign;
 
@@ -47,7 +51,7 @@ namespace RCPSSolver
     };
 
     inline Literal createLiteral(Variable* var, bool sign)
-    {
+    { // literal constructor
         Literal l;
         l.var = var;
         l.sign = sign;
@@ -55,6 +59,7 @@ namespace RCPSSolver
         return l;
     }
 
+    // data type for sat model
     typedef std::unordered_map<int,Variable> VariableDb;
     typedef std::unordered_map<int,Variable*> TimeToVar;
     typedef std::unordered_map<JobType,TimeToVar> JobTimeVarMap;

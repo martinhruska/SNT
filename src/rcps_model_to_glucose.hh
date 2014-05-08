@@ -17,6 +17,9 @@ namespace RCPSSolver
     class RCPSModel2Glucose;
 }
 
+/**
+ * Class for transformation of internal model to glucose.
+ */
 class RCPSSolver::RCPSModel2Glucose
 {
 private: // data types

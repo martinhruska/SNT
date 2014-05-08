@@ -35,6 +35,10 @@ int RCPSModel2Minisat::transformModel2Solver(
     return 0;
 }
 
+/*
+ * Add priority to process variable to make their pick during
+ * brening in sat solver more probable.
+ */
 int RCPSModel2Minisat::addPriority(const VariableDb& vars, Minisat::Solver& solver)
 {
     for (auto i : vars)
@@ -47,7 +51,11 @@ int RCPSModel2Minisat::addPriority(const VariableDb& vars, Minisat::Solver& solv
 
     return 0;
 }
-    
+ 
+/**
+ * Transform clause database from internal model
+ * to sat solver
+ */
 int RCPSModel2Minisat::transformClauseDb2Solver(ClauseDb& clauseDb,
         Minisat::Solver& solver)
 {

@@ -16,14 +16,15 @@
  */
 int RCPSSolver::rcpsFloydWarshall(PrecedenceGraph& graph)
 {
-    //graph.size_ = 14;
     for (int k = 0; k < graph.size_; ++k)
     {
         for (int i = 0; i < graph.size_; ++i)
         {
             for (int j = 0; j < graph.size_; ++j)
             {
-                if (graph.graph_[i][k] != INT_MIN && graph.graph_[k][j] != INT_MIN && graph.graph_[i][j] < graph.graph_[i][k]+graph.graph_[k][j])
+                if (graph.graph_[i][k] != INT_MIN &&
+                    graph.graph_[k][j] != INT_MIN &&
+                    graph.graph_[i][j] < graph.graph_[i][k]+graph.graph_[k][j])
                 {
                     graph.graph_[i][j] = graph.graph_[i][k]+graph.graph_[k][j];
                 }

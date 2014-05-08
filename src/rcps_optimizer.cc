@@ -94,7 +94,7 @@ int RCPSOptimizer::optimize_(RCPSInstance& instance,
         ++max;
 
         if (timeout>=0 && (clock()-start)/CLOCKS_PER_SEC > timeout)
-        {
+        { // it is time to end the computation
             std::cout << "Timeout\n";
             break;
         }

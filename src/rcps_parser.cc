@@ -56,7 +56,7 @@ int Parser::parse(RCPSInstance& instance, const char* source)
                 state = 3;
                 break;
             case(3):
-            {
+            { // read number of jobs
                 int temp = getValue(line);
                 if (temp < 0)
                 {
@@ -72,7 +72,7 @@ int Parser::parse(RCPSInstance& instance, const char* source)
                 break;
             }
             case(4):
-            {
+            { // parse upper bound info
                 int temp = getValue(line);
                 if (temp < 0)
                 {
@@ -88,7 +88,7 @@ int Parser::parse(RCPSInstance& instance, const char* source)
                 state = 6;
                 break;
             case(6):
-            {
+            { // precedence part
                 int temp = getValue(line);
                 if (temp < 0)
                 {
@@ -112,7 +112,7 @@ int Parser::parse(RCPSInstance& instance, const char* source)
                 break;
             case(10):
                 if (parsePSPInfo(instance, line) != 0)
-                {
+                { // parser precedence part info
                     return -1;
                 }
                 state = 11;
@@ -128,7 +128,7 @@ int Parser::parse(RCPSInstance& instance, const char* source)
                     state = 15;
                 }
                 else
-                {
+                { // precedence relation
                     int res = parsePrecedenceLine(instance,line);
                     if (res != 0)
                     {
@@ -141,7 +141,7 @@ int Parser::parse(RCPSInstance& instance, const char* source)
             case(17): // skip over request header
                 ++state;
                 break;
-            case(18):
+            case(18): // resources demands
                 if (line[0] == '*')
                 {
                     state = 19;
@@ -159,7 +159,7 @@ int Parser::parse(RCPSInstance& instance, const char* source)
             case(20): // skip over to resources
                 ++state;
                 break;
-            case(21):
+            case(21): // resources are parsed
                 if (parseResourcesLine(instance,line) != 0)
                 {
                     return -1;
@@ -202,6 +202,9 @@ int Parser::parse(RCPSInstance& instance, const char* source)
     return res;
 }
 
+/**
+ * Get number of activities from given line
+ */
 int Parser::getValue(std::string& line)
 {
     unsigned int i = 0;
@@ -230,6 +233,9 @@ int Parser::getValue(std::string& line)
     return res;
 }
 
+/**
+ * Line with general info about RCPS
+ */
 int Parser::parsePSPInfo(RCPSInstance& instance, std::string& line)
 {
     char* cLine;
@@ -371,6 +377,9 @@ int Parser::parseDemandLine(RCPSInstance& instance, std::string& line)
     return 0;
 }
 
+/*
+ * Parse resources line
+ */
 int Parser::parseResourcesLine(RCPSInstance& instance, std::string& line)
 {
     char* cLine = NULL;

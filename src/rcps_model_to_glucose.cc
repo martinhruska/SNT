@@ -35,7 +35,10 @@ int RCPSModel2Glucose::transformModel2Solver(
     return 0;
 }
 
-
+/**
+ * Add priority to the process variables because
+ * branching on them is more efficient
+ */
 int RCPSModel2Glucose::addPriority(const VariableDb& vars, Glucose::Solver& solver)
 {
     for (auto i : vars)
@@ -48,7 +51,10 @@ int RCPSModel2Glucose::addPriority(const VariableDb& vars, Glucose::Solver& solv
 
     return 0;
 }
-    
+
+/**
+ * Clause databases from internal model to sat solver
+ */    
 int RCPSModel2Glucose::transformClauseDb2Solver(ClauseDb& clauseDb,
         Glucose::Solver& solver)
 {

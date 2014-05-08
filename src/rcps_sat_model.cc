@@ -180,6 +180,9 @@ int RCPSSolver::createVarDb(RCPSSATModel& model,
     return 0;
 }
 
+/**
+ * Print model stored in given RCPSSATModel object
+ */
 void RCPSSolver::printModel(RCPSSATModel& model)
 {
     std::cout << "Print start values: \n";
@@ -198,6 +201,9 @@ void RCPSSolver::printModel(RCPSSATModel& model)
     printClauseDb(model.clausesOpt_);
 }
 
+/**
+ * Print databases of variables
+ */
 void RCPSSolver::printVarDb(VariableDb& vars)
 {
     for (auto i : vars)
@@ -207,6 +213,9 @@ void RCPSSolver::printVarDb(VariableDb& vars)
     std::cout << '\n';
 }
 
+/**
+ * Print databases of clauses
+ */
 void RCPSSolver::printClauseDb(ClauseDb& clauseDb)
 {
     for (auto clause : clauseDb)

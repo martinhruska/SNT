@@ -1,3 +1,7 @@
+# RCPS solver
+# author: Martin Hruska
+# e-mail: xhrusk16@stud.fit.vutbr.cz
+
 CC=g++-4.8
 #CFLAGS=-Wall -Wextra -std=c++11 -isystem sat_solver/minisat/ -Lsat_solver/minisat/build/dynamic/lib -lminisat
 CFLAGS := -Wall -O3 -Wextra -std=c++11 -isystem sat_solver/glucose/ -isystem sat_solver/glucose/ -isystem sat_solver/minisat/ -Lsat_solver/minisat/build/dynamic/lib -lminisat -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS

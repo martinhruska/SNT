@@ -24,6 +24,9 @@ namespace RCPSSolver
             RCPSSATModel& model, const RCPSInstance& instance);
 }
 
+/**
+ * Class for representation of SAT model
+ */
 class RCPSSolver::RCPSSATModel
 {
 private: // private data members
@@ -32,6 +35,7 @@ private: // private data members
     VariableDb processVarDb_;
     JobTimeVarMap startVarMap_;
     JobTimeVarMap processVarMap_;
+    // created clauses
     ClauseDb clausesConsistency_;
     ClauseDb clausesPrecedence_;
     ClauseDb clausesStart_;
