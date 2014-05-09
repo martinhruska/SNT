@@ -421,13 +421,15 @@ v~\cite{horbach:10} přesně popsána.
 
 \begin{table}[tb]
 \begin{center}
-  \begin{tabular}{ | l | r | r | r | r | r | r |}
+\scalebox{0.7}{
+  \begin{tabular}{ | l | r | r | r | r | r | r | r | r | r |}
    \hline
-    & \textbf{Optimalizována [\%]} & Do 1s [\%] & Do 2s [\%] & Do 5s [\%] & Do 10s [\%] & Do 50s [\%]\\ \hline \hline
-    j30 &$83$ & $67$ & $21$  &$2$ & $0$ & $0$ \\ \hline
-    j60 & $47893.3$ & $48186.44$ & & & \\ \hline
+    & \textbf{Optimalizována [\%]} & Do 1s [\%] & Do 2s [\%] & Do 5s [\%] & Do 10s [\%] & Do 50s [\%] & Do 100s [\%] & Nad 100s [\%]\\ \hline \hline
+    j30 &$83$ & $77$ & $2.3$  &$5$ & $2.9$ & $4.1$ & $ 0.8 $ & $7.9$ \\ \hline
+    j60 & $70$ & $63.7$ & $12$ & $6.8$ & $2.8$ & $3.7$ & $1.6$ & $9.4$  \\ \hline
     j120 & $42 029$ & $42 029$ & & & \\ \hline
    \end{tabular}
+}
    \caption{Tabulka výsledků s~experimenty se sadami j30, j60, j120 z~PSPLIB.}
    \label{table:jreses}
 \end{center}
@@ -435,7 +437,7 @@ v~\cite{horbach:10} přesně popsána.
 
 \begin{figure}[tb]
     \includegraphics[scale=0.5]{dst_j30}
-    \includegraphics[scale=0.5]{dst_j30}
+    \includegraphics[scale=0.5]{dst_j60}
     \caption{Doba výpočtu SAT solveru v~závislosti na vzdálenosti makespan od optima v~instanci RCPS problému redukovaného na SAT.
     Výsledky pro sadu j30 (vlevo) a j60 (vpravo).}
     \label{pic:j30}
@@ -453,7 +455,7 @@ Dalším výstupem experimentů jsou grafy \ref{pic:j30}, \ref{pic:j120},
 které ukazují dobu, kterou SAT solver potřeboval na rozhodnutí instance SAT problému
 s~daným makespanem, v~závislosti na vzdálenosti tohoto makespan od optimálního.
 V~grafu jsou zaneseny jen výsledky, u~nichž byla doba řešení úlohy delší nebo rovna 1 sekunda.
-Takovýchto případů bylo $20\%$ u~sady j30, TODO.
+Takovýchto případů bylo $80\%$ u~sady j30, $72\%$ u~sady j60 a  TODO.
 Z~grafu je patrné, že náročnost na řešení instancí SAT problému vzrostla blíže optimálnímu řešení instance RCPS problému.
 Několik případů v~každé sadě bylo velmi náročných, což odpovídá výraznému navýšení doby výpočtu v~blízkosti optima.
 

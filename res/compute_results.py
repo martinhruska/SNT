@@ -54,7 +54,8 @@ satTimeFile.close()
 ############################################
 # Compute times
 ############################################
-timesFile = open("eval/"+inst+"/done.txt",'r')
+instancesReal = 0.0
+timesFile = open("eval/"+inst+"/done",'r')
 time0 = 0
 time1 = 0
 time5 = 0
@@ -64,19 +65,20 @@ time100 = 0
 time500 = 0
 for i in timesFile:
     time = int(i)
-    if time is 0:
+    instancesReal += 1
+    if time >= 0 and time < 1:
         time0 += 1
-    elif time is 1:
+    elif time >= 1 and time < 2:
         time1 += 1
-    elif time is 5:
+    elif time >= 2 and time < 5:
         time5 += 1
-    elif time is 10:
+    elif time >= 5 and time < 10:
         time10 += 1
-    elif time is 50:
+    elif time >= 10 and time < 50:
         time50 += 1
-    elif time is 100:
+    elif time >= 50 and time < 100:
         time100 += 1
-    elif time is 500:
+    elif time >= 100:
         time500 += 1
 timesFile.close()
 
@@ -85,11 +87,11 @@ opmSucFile.write(str(optimized/instances))
 opmSucFile.close()
 
 timeFile = open("eval_res/"+inst+"_time",'w')
-timeFile.write("0 "+str(time0/instances)+'\n')
-timeFile.write("1 "+str(time1/instances)+'\n')
-timeFile.write("5 "+str(time5/instances)+'\n')
-timeFile.write("10 "+str(time10/instances)+'\n')
-timeFile.write("50 "+str(time50/instances)+'\n')
-timeFile.write("100 "+str(time100/instances)+'\n')
-timeFile.write("500 "+str(time500/instances)+'\n')
+timeFile.write("0 "+str(time0/instancesReal)+'\n')
+timeFile.write("1 "+str(time1/instancesReal)+'\n')
+timeFile.write("5 "+str(time5/instancesReal)+'\n')
+timeFile.write("10 "+str(time10/instancesReal)+'\n')
+timeFile.write("50 "+str(time50/instancesReal)+'\n')
+timeFile.write("100 "+str(time100/instancesReal)+'\n')
+timeFile.write("500 "+str(time500/instancesReal)+'\n')
 timeFile.close()
