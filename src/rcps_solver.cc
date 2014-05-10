@@ -67,7 +67,7 @@ int main(int argc, char** argv)
     const int infilePos = 1;
     const int solverPos = 2;
     const int timeoutPos = 3;
-    if (argc < requestParams && argc > requestParams+2)
+    if (argc < requestParams || argc > requestParams+2)
     { // 2-4 parameters allowed
         std::cerr << "Wrong number of parameters \n";
         printHelp();
