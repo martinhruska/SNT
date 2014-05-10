@@ -36,7 +36,7 @@ static const int buffer_size = 1048576;
 
 
 class StreamBuffer {
-    gzFile        in;
+    //gzFile        in;
     unsigned char buf[buffer_size];
     int           pos;
     int           size;
