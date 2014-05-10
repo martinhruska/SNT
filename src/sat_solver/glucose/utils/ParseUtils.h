@@ -44,7 +44,7 @@ class StreamBuffer {
     void assureLookahead() {
         if (pos >= size) {
             pos  = 0;
-            size = gzread(in, buf, sizeof(buf)); } }
+            size = 0;//gzread(in, buf, sizeof(buf)); } }
 
 public:
     explicit StreamBuffer(gzFile i) : in(i), pos(0), size(0) { assureLookahead(); }

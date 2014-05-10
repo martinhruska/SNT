@@ -145,7 +145,7 @@ int main(int argc, char** argv)
         
         if (argc == 1)
             printf("c Reading from standard input... Use '--help' for help.\n");
-        
+        /*
         gzFile in = (argc == 1) ? gzdopen(0, "rb") : gzopen(argv[1], "rb");
         if (in == NULL)
             printf("c ERROR! Could not open file: %s\n", argc == 1 ? "<stdin>" : argv[1]), exit(1);
@@ -156,7 +156,7 @@ int main(int argc, char** argv)
         
         parse_DIMACS(in, S);
         gzclose(in);
-        
+        */
 
 	
         FILE* res = (argc >= 3) ? fopen(argv[argc-1], "wb") : NULL;
