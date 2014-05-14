@@ -24,17 +24,18 @@
 
 \section{Úvod}
 \label{sec:intro}
-\rcps\ (RCPS) problém představuje otázku, zdali pro danou množinu aktivit, mezi kterými je definována
-relace precedence, z~nich každá má určitou dobu trvání, určité požadavky na zdroje, jejichž množství je omezené,
-existuje výrobní rozvrh, v~němž mohou být aktivity provedeny bez konfliktů.
+\rcps\ (RCPS) problém lze formulovat jako otázku, zdali pro danou množinu aktivit,
+z~nich každá má určitou dobu trvání, existuje rozvrh, v~němž mohou být provedeny.
+Mezi aktivitami je také definována relace precedence a dále má každá požadavky na zdroje,
+jejichž množství je omezené. 
 Optimalizace RCPS problém pak spočívá v~nalezení rozvrhu s~nejkratší dobou trvání.
 
 Jelikož je RCPS problém NP-úplný \cite{artigues:2007}, tak se k~jeho řešení používají metody jako
 lineární programování, genetické nebo optimalizační (Ant Colony Optimization) algoritmy, či jiné heuristiky.
 Tato práce se ale zabývá implementací optimalizátoru RCPS problému, nazvaného \emph{RCPSSolver},
 založeného na redukci RCPS problému na SAT problém.
-Instance SAT problému se řeší nástroji nazývanými SAT solvery.
-Ty učinily v~posledních letech svého vývoje výrazný pokrok a dokáží řešit i obtížné problémy \cite{horbach:10}.
+Při tomto způsobu řešení lze použít nástroje pro řešení SAT problému, které se nazývají SAT solvery.
+Ty učinily v~posledních letech svého vývoje výrazný pokrok a dokáží řešit i obtížné instance problému \cite{horbach:10}.
 Při redukci RCPS problému na SAT problém je také možné určit zdroj exponenciální složitosti a tu
 omezit vhodnou implementací, při níž se předchází generování exponenciálního množství klausulí pro SAT problém.
 Výhodou tohoto řešení je také, že se nejedná pouze o~numerickou aproximaci řešení, ale podává přesné výsledky.
@@ -52,7 +53,7 @@ Sekce \ref{sec:exps} shrnuje provedené experimenty s~vytvořeným nástrojem.
 
 \section{Analýza \rcps}
 \label{sec:analysis}
-V~této sekci bude napřed formálně definován \rcps\ problém a optimalizační problém související s~jeho řešení.
+V~této sekci bude napřed formálně definován \rcps\ problém a optimalizační problém s~ním související.
 Dále bude popsána knihovna PSPLIB a následně bude definován SAT problém.
 
 \subsection{Formální definice RCPS}
@@ -60,7 +61,7 @@ Dále bude popsána knihovna PSPLIB a následně bude definován SAT problém.
 \begin{enumerate}
     \item $V=\{A_0, \ldots, A_{n+1}\}$ je množina aktivit, které mají být vykonány.
     Dle konvence je $A_0$ aktivita reprezentující začátek rozvrhu a $A_{n+1}$ aktivita reprezentující konec rozvrhu.
-    \item $p: V~\rightarrow \mathbb{N}$ je funkce udávající dobu trvání aktivit.
+    \item $d: V~\rightarrow \mathbb{N}$ je funkce udávající dobu trvání aktivit.
     \item $E \subseteq V\times V$ je precedenční relace.
     Pokud $(A_i, A_j) \in E$, tak aktivita $A_i$ musí být provedena před aktivitou $A_j$.
     \item $R=\{R_1,\ldots,R_q\}$ je množina zdrojů.
@@ -73,7 +74,7 @@ Dále bude popsána knihovna PSPLIB a následně bude definován SAT problém.
 Toto řešení můžeme nazývat rozvrhem.
 Řešení musí splňovat omezení daná precedenční relací a dostupností zdrojů, což lze formálně zapsat následovně:
 \begin{equation}
- \forall (A_i,A_j) \in E: S_j - S_i \geq p(A_i)
+ \forall (A_i,A_j) \in E: S_j - S_i \geq d(A_i)
 \end{equation}
 \begin{equation}
  \forall R_k \in R\ \forall t \geq 0: \sum_{A_i \in A_t} b(A_i, R_k) \leq B(k)
@@ -97,8 +98,8 @@ Kritická cesta je nejdelší cesta mezi uzly představujícími aktivitu $0$ a 
 pomocí Floyd-Warshallova algoritmu.
 Z~tohoto výpočtu dostáváme také údaje o~nejdelších cestách mezi jednotlivými uzly, což lze následně použít
 při výpočtu doby nejdřívějšího a nejpozdějšího začátku.
-Kritická cesta pak představuje dobu, za kterou by šla úloha splnit nejdříve, pokud by neexistovalo omezení dané
-množství zdrojů, ale pouze omezení dané precedenční relací.
+Kritická cesta pak představuje dobu, za kterou by šla úloha splnit nejdříve, pokud by neexistovalo omezení daná
+množstvím zdrojů, ale pouze omezení dané precedenční relací.
 Kritická cesta bude v~následujícím textu uvažována jako spodní hranice řešení, tedy hranice u~níž víme, že nelze
 dosáhnout nižšího makespan, než je její hodnota.
 Opakem je poté horní hranice řešení, která udává maximální dobu, kterou může makespan nabývat a jejíž volba
@@ -114,7 +115,7 @@ Příklad vstupních dat lze najít v~adresáři \emph{input}.
 
 \subsection{SAT Solving}
 Metody a nástroje SAT solvingu se zabývají řešením SAT problému (je NP-úplný),
-který odpovídá na otázku, zdali je daná formule výrokové logiky splnitelná.
+který spočívá v~zodpovězení otázky, zdali je daná formule výrokové logiky splnitelná.
 V~našem případě uvažujeme formuli výrokové logiky v~\emph{konjunktivní} normální formě (CNF).
 Taková formule je definovaná přes množinu proměnných, které nabývají hodnoty z~množiny $\{true, false\}$
 a je složena z~následujících prvků:
@@ -202,7 +203,7 @@ SAT formule budou definovány nad následujícími proměnnými:
     $s_{it}=
         \left\{
         \begin{array}{ll}
-             true & \mbox{pokud} \emph{ aktivita }j \emph{ začíná v~čase }t \\
+             true & \mbox{pokud} \emph{ aktivita }i \emph{ začíná v~čase }t \\
              false & \mbox{jinak}\\
         \end{array}
         \right.
@@ -211,7 +212,7 @@ SAT formule budou definovány nad následujícími proměnnými:
     $u_{it}=
         \left\{
         \begin{array}{ll}
-             true & \mbox{pokud} \emph{ aktivita }j \emph{ je prováděna  v~čase }t \\
+             true & \mbox{pokud} \emph{ aktivita }i \emph{ je prováděna  v~čase }t \\
              false & \mbox{jinak}\\
         \end{array}
         \right.
@@ -255,7 +256,7 @@ Každá množina klausulí z~definic~\ref{eq:1},\ref{eq:2},\ref{eq:3} nabývá p
 a proto je možné je vygenerovat na základě instance RCPS problému před spuštěním SAT solveru.
 Počet klausulí z~definice \ref{eq:4} ovšem roste exponenciálně, a tudíž by jejich kompletní vygenerování bylo možné jen pro instance
 s~malým počtem aktivit,
-Proto jsou tyto klausule v~dokumentované implementaci přidávány do databáze SAT solveru dynamicky.
+Proto jsou tyto klausule v~RCPSSolveru přidávány do databáze SAT solveru dynamicky.
 Bližší informace stran implementace samotné jsou v~sekci \ref{sec:arch}.
 
 Aby bylo možné provádět samotnou optimalizaci, je třeba přidat klausule omezující maximální makespan.
@@ -287,7 +288,7 @@ V~této interní reprezentaci se instance RCPS problému předá optimalizátoru
 který pomocí příslušných modulů vypočte kritickou cestu a s~ní související informace a doplní je do reprezentace RCPS problému.
 Následně je vytvořena interní reprezentace SAT problému (SAT formule v~CNF), která je následně
 převedena do reprezentace příslušného SAT solveru, který je na závěr spuštěn.
-Toto optimalizátor postupně provádí pro jednotlivé makespan, dokud není nalezen ten nejnižší možný.
+Optimalizátor toto postupně provádí pro jednotlivé makespan, dokud není nalezen ten nejnižší možný.
 \begin{figure}
 \begin{center}
     \input{arch.tikz}
@@ -330,7 +331,7 @@ Následuje seznam tříd implementující jednotlivé bloky z~logického návrhu
     \begin{itemize}
         \item \emph{MiniSAT} \cite{www:minisat} je SAT solver použity v~\cite{horbach:10}.
         Dříve patřil mezi nejlepší SAT solvery (oceněný v~soutěži \cite{www:sat}), dnes již neimplementuje
-        všechny aktuální heuristiky a optimalizace používaný v~SAT Solvingu.
+        všechny aktuální heuristiky a optimalizace používané v~SAT Solvingu.
         \item \emph{Glucose} \cite{www:glucose} je nadstavbou nad MiniSAT, která implementuje
         pokročilejší optimalizace a je v~posledních letech oceňována v~soutěži SAT Competition \cite{www:sat}.
         Zachovává rozhraní MiniSAT, tudíž ji bylo možné použít bez nutnosti výraznějších změn postupů použitých při
@@ -394,12 +395,12 @@ o~chybu zanesenou implementací dynamického přidávání klausulí a nebo o~ch
 způsobenou velikostí řešeného problému.
 Proto v~případech, kdy by mělo k~chybě \texttt{segmentation fault} dojít,
 je daná instance prohlášena za nesplnitelnou a je zvětšen makespan.
-Touto cestou nelze najít opravdu optimální řešení, protože právě kolem
+Touto cestou nemusí být nalezeno optimální řešení, protože právě kolem
 hodnoty optimálního makespan dochází k~nárůstu složitosti výpočtu a tedy
 i zmíněné chybě, ale lze dostat alespoň suboptimální řešení udávající
 nejnižší makespan, pro který jde úloha vyřešit.
 V~případě, že je použita tato heuristika, je vypsáno na standardní výstup
-\emph{NOT OPTIMAL}, aby bylo zřejmé, že výsledek nemusí být přesný.
+\emph{NON OPTIMAL}, aby bylo zřejmé, že výsledek nemusí být přesný.
 
 \section{Experimenty}
 \label{sec:exps}
@@ -488,7 +489,8 @@ zrychlily výpočet SAT solveru.
 \section{Instalace}
 \label{app:install}
 K~projektu je přiložen soubor \emph{Makefile}, tudíž lze zdrojové kódy zkompilovat pomocí příkazu \texttt{make}.
-Pro úspěšnou kompilaci je nutné mít nainstalovaný překladač GCC verze 4.8.
+Pro úspěšnou kompilaci je nutné mít nainstalovaný překladač GCC verze 4.8 a také příslušné knihovny vyžadované
+použitými SAT solvery.
 Před spuštění je třeba dokončit konfiguraci prostředí skriptem \texttt{configure.sh} (určeno pro linuxové systémy),
 který přidá do systémových proměnných cestu ke knihovnám MiniSAT.
 Výstupem kompilace je spustitelný binární soubor \texttt{rcps\_solver} v~adresáři \texttt{bin}.
@@ -519,7 +521,7 @@ Na standardní výstup pak vypisuje následující informace:
     $U$ je doba řešení SAT problému a $V$ celková doba řešení RCPS problému pro daný makespan, oba údaje jsou v~sekundách.
     \item \texttt{Done X} $\ldots$ X je celková doba výpočtu optimalizace RCPS problému v~sekundách.
     \item \texttt{Optimal: X} $\ldots$ X je optimální řešení RCPS problému nalezené RCPSolverem.
-    \item \texttt{NOT OPTIMAL} $\ldots$ byla použita heuristika ze sekce \ref{sub:impl} a výsledek nemusí být optimální.
+    \item \texttt{NON OPTIMAL} $\ldots$ byla použita heuristika ze sekce \ref{sub:impl} a výsledek nemusí být optimální.
 \end{itemize}
 Další výstupy pak mohou být informace, které vypisuje SAT solver.
 
