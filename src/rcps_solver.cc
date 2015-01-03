@@ -56,7 +56,7 @@ void printHelp()
 {
     std::cout << "./rcps_solver input [solver] [timeout]\n";
     std::cout << "input .... input file from PSPLIB\n";
-    std::cout << "solver ... 'm' for minisat (default), 'g' for Glucose\n";
+    std::cout << "solver ... 'm' for minisat, 'g' for Glucose (default) \n";
     std::cout << "timeout ... timeout for solution (note, this timeout is only for rcps_solver, so the last SAT solver task will be finished)\n";
     std::cout << "If you enter both, solver and time option, their order is compulsory\n";
 }
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
     }
 
     int timeout = -1;
-    int solver = 1; // 0 glucose, 1 minisat
+    int solver = 0; // 0 glucose, 1 minisat
 
     if (strcmp(argv[infilePos], "-h") == 0 ||
         strcmp(argv[infilePos], "-help") == 0)

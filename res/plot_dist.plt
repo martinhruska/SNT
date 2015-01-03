@@ -5,4 +5,4 @@ set terminal png
 set output "dst.png"
 set autoscale
 set grid
-plot "eval_res/j60_dst" using 1:2 with points title ""
+plot "eval_res/j120_dst" using 1:2 with points title ""

@@ -8,6 +8,7 @@ resDir = "eval/"+inst
 opmFilePath = sys.argv[1]+"_opm"
 opmFile = open(opmFilePath,'r')
 instances = 480.0
+allIns=0
 optimized = 0
 zeroTimeSAT = 0
 timesSAT = 0.0
@@ -24,6 +25,7 @@ for i in opmFile:
     opmInstance = "eval/"+inst+"/"+name+".sm_res_opt"
     if not os.path.isfile(opmInstance):
         continue
+    allIns += 1
     instanceOpmFile = open(opmInstance, 'r')
     l = instanceOpmFile.readline()
     if len(l) == 0:

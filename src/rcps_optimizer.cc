@@ -22,7 +22,7 @@ using namespace RCPSSolver;
 /**
  * Interface for optimization function.
  * @param instance ... RCPS instance object
- * @param solver 0 .. use glucose, 1 .. use minisat
+ * @param solver - 0 .. use glucose, 1 .. use minisat
  * @param timeout ... timeout for solving
  */
 int RCPSOptimizer::optimize(RCPSInstance& instance,

@@ -2,6 +2,10 @@ RCPSSolver
 Autor: Martin Hruska
 Datum: 8.5.2014
 
+Pozadavky:
+    g++-4.8
+    OS Linux (testovano na systemu Debian)
+
 Instalace:
     make
 
@@ -20,6 +24,5 @@ Ukazkove spusteni:
 Adresarova struktura:
     bin/ ... Vysledek prekladu
     src/ ... Zdrojove kody, vcetne pouzitych SAT solveru
-    input/ ... Pouzite vstupy z PSPLIB
-    doc/ ... Zdrojove kody Latexu pro dokumentace
+    input_example/ ... Pouzite vstupy z PSPLIB
     dokumentace.pdf ... Dokumentace ve formatu PDF

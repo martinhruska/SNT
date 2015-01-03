@@ -9,3 +9,4 @@ function make_test {
 
 make_test j30
 make_test j60
+make_test j120
