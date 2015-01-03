@@ -30,7 +30,7 @@ Mezi aktivitami je také definována relace precedence a dále má každá poža
 jejichž množství je omezené. 
 Optimalizace RCPS problém pak spočívá v~nalezení rozvrhu s~nejkratší dobou trvání.
 
-Jelikož je RCPS problém NP-úplný \cite{artigues:2007}, tak se k~jeho řešení používají metody jako
+Jelikož je RCPS problém NP-úplný \cite{artigues:2007}, tak se k~jeho řešení používají různé heuristické metody jako
 lineární programování, genetické nebo optimalizační (Ant Colony Optimization) algoritmy, či jiné heuristiky.
 Tato práce se ale zabývá implementací optimalizátoru RCPS problému, nazvaného \emph{RCPSSolver},
 založeného na redukci RCPS problému na SAT problém.
@@ -111,7 +111,7 @@ Knihovna používá ke generování instancí problému vlastní nástroj \emph{
 Ve shodě se zadáním projektu byly použita data knihovny PSPLIB jako vstupy dokumentovaného nástroje.
 Použití knihovny je vhodné také díky možnosti porovnávat výstupy vytvořeného programu s~optimálními řešeními, které
 knihovna pro mnoho instancí problému obsahuje.
-Příklad vstupních dat lze najít v~adresáři \emph{input}.
+Příklad vstupních dat lze najít v~adresáři \emph{input\_example}.
 
 \subsection{SAT Solving}
 Metody a nástroje SAT solvingu se zabývají řešením SAT problému (je NP-úplný),
@@ -255,7 +255,7 @@ Nepřečerpání některého ze zdrojů lze zajistit prostřednictvím \emph{kla
 Každá množina klausulí z~definic~\ref{eq:1},\ref{eq:2},\ref{eq:3} nabývá polynomiální velikosti a je tedy řešitelná pomocí moderních SAT solverů,
 a proto je možné je vygenerovat na základě instance RCPS problému před spuštěním SAT solveru.
 Počet klausulí z~definice \ref{eq:4} ovšem roste exponenciálně, a tudíž by jejich kompletní vygenerování bylo možné jen pro instance
-s~malým počtem aktivit,
+s~malým počtem aktivit.
 Proto jsou tyto klausule v~RCPSSolveru přidávány do databáze SAT solveru dynamicky.
 Bližší informace stran implementace samotné jsou v~sekci \ref{sec:arch}.
 
@@ -344,7 +344,7 @@ Následuje seznam tříd implementující jednotlivé bloky z~logického návrhu
 \end{itemize}
 
 \subsection{Modifikace SAT solveru}
-Jak bylo řečeno v~sekci \ref{sec:concept}, roste množství klausulí pokrytí \ref{eq:4} exponenciálně,
+Jak bylo řečeno v~sekci \ref{sec:concept}, roste množství klausulí pokrytí (klausule \ref{eq:4}) exponenciálně,
 proto není možné tyto klausule vygenerovat před spuštěním samotného SAT solveru.
 Je nutné je generovat dle potřeby během výpočtu, což lze udělat tak \cite{horbach:10}, že je spuštěn SAT solver bez
 těchto klausulí a na základě vypočteného ohodnocení proměnných je ověřováno, že v~žádném čase
@@ -409,8 +409,10 @@ z~knihovny PSPLIB, konkrétně byly použity sady \emph{j30, j60, j120}, kde
 číslice za písmenem 'j' udává počet aktivity, které obsahují instance v~dané sadě.
 Měření byla provedena na počítači s~procesorem Intel Core 2 Duo (2.13 GHz) a 4 GiB paměti.
 Časový limit pro optimalizaci jedné úlohy byl stanoven na $30$ minut.
-Experimenty byly provedeny za použití SAT solveru MiniSAT a byl měřen čas
-procesu na CPU.
+Experimenty byly provedeny za použití SAT solveru MiniSAT pro sady j30 a j60 a SAT solveru
+Glucose pro sadu j120, jelikož se tento SAT solver ukázal jako výkonnější, a tedy byl
+použit pro vyhodnocení těchto náročnějších instancí.
+Byl měřen čas procesu na CPU.
 
 V~tabulce \ref{table:jreses} jsou uvedeny výsledky experimentů.
 V~tabulce je uvedeno procento úspěšně optimalizovaných úloh z~dané sady v~porovnání s~optimálními
@@ -429,7 +431,7 @@ v~\cite{horbach:10} přesně popsána.
     & \textbf{Optimalizována [\%]} & Do 1s [\%] & Do 2s [\%] & Do 5s [\%] & Do 10s [\%] & Do 50s [\%] & Do 100s [\%] & Nad 100s [\%]\\ \hline \hline
     j30 &$83$ & $77$ & $2.3$  &$5$ & $2.9$ & $4.1$ & $ 0.8 $ & $7.9$ \\ \hline
     j60 & $70$ & $63.7$ & $12$ & $6.8$ & $2.8$ & $3.7$ & $1.6$ & $9.4$  \\ \hline
-    j120 & $42 029$ & $42 029$ & & & \\ \hline
+    j120 & $30$ & $0.9$ & $2.8$ & $8.2$ & $6.9$ & $8.9$ & $5.3$ & $67$  \\ \hline
    \end{tabular}
 }
    \caption{Tabulka výsledků s~experimenty se sadami j30, j60, j120 z~PSPLIB.}
@@ -446,7 +448,7 @@ v~\cite{horbach:10} přesně popsána.
 \end{figure}
 \begin{figure}[tb]
     \begin{center}
-    \includegraphics[scale=0.75]{dst_j30}
+    \includegraphics[scale=0.75]{dst_j120}
     \end{center}
     \caption{Doba výpočtu SAT solveru v~závislosti na vzdálenosti makespan od optima v~instanci RCPS problému redukovaného na SAT.
     Výsledky pro sadu j120.}
@@ -456,8 +458,8 @@ v~\cite{horbach:10} přesně popsána.
 Dalším výstupem experimentů jsou grafy \ref{pic:j30}, \ref{pic:j120},
 které ukazují dobu, kterou SAT solver potřeboval na rozhodnutí instance SAT problému
 s~daným makespanem, v~závislosti na vzdálenosti tohoto makespan od optimálního.
-V~grafu jsou zaneseny jen výsledky, u~nichž byla doba řešení úlohy delší nebo rovna 1 sekunda.
-Takovýchto případů bylo $80\%$ u~sady j30, $72\%$ u~sady j60 a  TODO.
+V~grafu jsou zaneseny jen výsledky, u~nichž byla doba řešení úlohy delší nebo rovna 1 sekundě.
+Takovýchto případů bylo $80\%$ u~sady j30, $72\%$ u~sady j60 a $33\%$ u~sady j120.
 Z~grafu je patrné, že náročnost na řešení instancí SAT problému vzrostla blíže optimálnímu řešení instance RCPS problému.
 Několik případů v~každé sadě bylo velmi náročných, což odpovídá výraznému navýšení doby výpočtu v~blízkosti optima.
 
@@ -475,7 +477,8 @@ S~nástrojem RCPSSolver byly provedeny experimenty nad instancemi RCPS problému
 z~knihovny PSPLIB, které nástroj přijímá jako svoje vstupy.
 V~experimentech se nedařilo dosáhnout stejně kvalitních výsledků, jichž bylo dosaženo v~\cite{horbach:10},
 což lze přisoudit možným rozdílům v~modifikaci v~SAT solveru.
-Výsledky experimentů ovšem ukazují, že přístup redukce z~RCPS problému na SAT problém
+Výsledky experimentů ovšem ukazují, že se podařilo řešit i obtížnější
+instance RCPS problému, a tedy redukce RCPS problému na SAT problém
 může být efektivním přístupem k~optimalizaci RCPS problému.
 
 Další vývoj práce může být zaměřen na použití dalšího SAT solveru, či hlubší
@@ -504,8 +507,8 @@ RCPSSolver lze spouštět z~příkazového řádku následujícím způsobem:
     \item \texttt{soubor} $\ldots$ Cesta k~vstupnímu souboru s~instancí problému z~PSPLIB
     \item \texttt{solver} $\ldots$ Volba SAT solveru.  
     \begin{itemize}
-        \item m $\ldots$ MiniSAT (default).
-        \item g $\ldots$ Glucose.
+        \item m $\ldots$ MiniSAT.
+        \item g $\ldots$ Glucose (default).
     \end{itemize}
     \item \texttt{timeout} $\ldots$ Doba pro řešení optimalizačního problému.
     Neovlivní činnost SAT solveru, takže bude vždy před ukončením programu dořešena poslední SAT úloha.
